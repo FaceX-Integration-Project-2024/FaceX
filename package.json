@@ -11,10 +11,16 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@fontsource/inter": "^5.1.0",
+    "@kobalte/core": "^0.13.6",
     "@solidjs/meta": "^0.29.4",
     "@solidjs/router": "^0.14.7",
     "@solidjs/start": "^1.0.8",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.1",
     "solid-js": "^1.9.1",
+    "tailwind-merge": "^2.5.2",
+    "tailwindcss-animate": "^1.0.7",
     "vinxi": "^0.4.3"
   },
   "engines": {
@@ -23,6 +29,9 @@
   "devDependencies": {
     "@biomejs/biome": "^1.9.2",
     "@supabase/supabase-js": "^2.45.4",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.13",
     "typescript": "^5.6.2"
   },
   "packageManager": "pnpm@9.11.0"

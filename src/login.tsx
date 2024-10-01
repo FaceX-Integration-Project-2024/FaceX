@@ -1,6 +1,8 @@
 import { createSignal } from "solid-js";
 import { supabase } from "./supabase-client";
 
+import { Button } from "~/components/ui/button";
+
 export default function Login() {
 	const [loading, setLoading] = createSignal(false);
 	const [email, setEmail] = createSignal("");
@@ -31,14 +33,7 @@ export default function Login() {
 		<div class="row flex-center flex">
 			<div class="col-6 form-widget" aria-live="polite">
 				<h1 class="header">Supabase + SolidJS</h1>
-				<p class="description">Sign in via Microsoft</p>
-				<form class="form-widget" onSubmit={handleLogin}>
-					<div>
-						<button type="submit" class="button block" aria-live="polite">
-							{loading() ? <span>Loading</span> : <span>Login</span>}
-						</button>
-					</div>
-				</form>
+				<Button onClick={handleLogin}>Login with Microsoft</Button>
 			</div>
 		</div>
 	);
