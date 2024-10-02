@@ -7,7 +7,7 @@ export default function Login() {
 	const [loading, setLoading] = createSignal(false);
 	const [email, setEmail] = createSignal("");
 
-	const handleLogin = async (e: SubmitEvent) => {
+	const handleLogin = async (e: MouseEvent) => {
 		e.preventDefault();
 
 		try {
