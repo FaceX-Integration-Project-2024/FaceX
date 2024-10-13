@@ -1,56 +1,46 @@
-import { RiMediaWebcamLine } from 'solid-icons/ri'
+import { useLocation } from "@solidjs/router";
+import { IoStatsChart } from "solid-icons/io";
+import { RiMediaWebcamLine } from "solid-icons/ri";
+import { RiSystemTimer2Line } from "solid-icons/ri";
+import { TiGroup } from "solid-icons/ti";
 
 export default function Navbar() {
+	const location = useLocation();
+
 	return (
 		<nav class="flex items-right justify-between p-4 bg-gray-100 shadow-md rounded-lg">
 			<div class="flex items-center">
-				<RiMediaWebcamLine class="w-6 mr-2"/>
-				<span class="font-bold text-lg">FaceX</span>
+				<RiMediaWebcamLine class="w-8 h-8 mr-1" />
+				<a href="/" class="font-bold text-lg">
+					FaceX
+				</a>
 			</div>
 
 			<div class="flex items-center space-x-6">
 				<div class="flex items-center group cursor-pointer">
-					<img
-						src="./images/roulette.png"
-						alt="Roulette Icon"
-						class="w-5 mr-1 group-hover:hidden"
-					/>
-					<img
-						src="./images/roulette-hover.png"
-						alt="Roulette Icon Hover"
-						class="w-5 mr-1 hidden group-hover:block"
-					/>
-					<a href="/#" class="group-hover:text-blue-500">
+					<a
+						href="/roulette"
+						class={`flex flex-row ${location.pathname === "/roulette" ? "text-blue-500" : "group-hover:text-blue-500"}`}
+					>
+						<RiSystemTimer2Line class="w-6 h-6 mr-1" />
 						Roulette
 					</a>
 				</div>
 				<div class="flex items-center group cursor-pointer">
-					<img
-						src="./images/tracking.png"
-						alt="Tracking Icon"
-						class="w-5 mr-1 group-hover:hidden"
-					/>
-					<img
-						src="./images/tracking-hover.png"
-						alt="Tracking Icon Hover"
-						class="w-5 mr-1 hidden group-hover:block"
-					/>
-					<a href="/tracking" class="group-hover:text-blue-500">
+					<a
+						href="/tracking"
+						class={`flex flex-row ${location.pathname === "/tracking" ? "text-blue-500" : "group-hover:text-blue-500"}`}
+					>
+						<IoStatsChart class="w-6 h-6 mr-1" />
 						Tracking
 					</a>
 				</div>
 				<div class="flex items-center group cursor-pointer">
-					<img
-						src="./images/group.png"
-						alt="Group Icon"
-						class="w-5 mr-1 group-hover:hidden"
-					/>
-					<img
-						src="./images/group-hover.png"
-						alt="Group Icon Hover"
-						class="w-5 mr-1 hidden group-hover:block"
-					/>
-					<a href="/#" class="group-hover:text-blue-500">
+					<a
+						href="/group"
+						class={`flex flex-row ${location.pathname === "/group" ? "text-blue-500" : "group-hover:text-blue-500"}`}
+					>
+						<TiGroup class="w-6 h-6 mr-1" />
 						Groupe
 					</a>
 				</div>
