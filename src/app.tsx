@@ -6,6 +6,7 @@ import "@fontsource/inter";
 import "./app.css";
 
 import type { AuthSession } from "@supabase/supabase-js";
+import Navbar from "./components/navbar";
 import Login from "./login";
 import { supabase } from "./supabase-client";
 
@@ -25,6 +26,7 @@ export default function App() {
 			root={(props) => (
 				<MetaProvider>
 					<Title>FaceX</Title>
+					<Navbar />
 					<Suspense>{props.children}</Suspense>
 				</MetaProvider>
 			)}
