@@ -26,7 +26,9 @@ export default function App() {
 			root={(props) => (
 				<MetaProvider>
 					<Title>FaceX</Title>
-					<Navbar />
+					<Show when={session()}>
+						<Navbar />
+					</Show>
 					<Suspense>{props.children}</Suspense>
 				</MetaProvider>
 			)}
