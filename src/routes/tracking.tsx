@@ -23,9 +23,12 @@ import {
 
 export default function TrackingPage() {
 	const [selectedBlockId, setSelectedBlockId] = createSignal(1);
-	const [blockids] = createResource(async () => {
-		return getAllClassBlocksIds();
-	}, {initialValue: [1]});
+	const [blockids] = createResource(
+		async () => {
+			return getAllClassBlocksIds();
+		},
+		{ initialValue: [1] },
+	);
 	const [attendances, { refetch }] = createResource(
 		selectedBlockId,
 		async (blockId) => {
@@ -40,9 +43,7 @@ export default function TrackingPage() {
 			<Select<number>
 				value={selectedBlockId()}
 				onChange={setSelectedBlockId}
-				options={
-					blockids()
-				}
+				options={blockids()}
 				placeholder="Select a class block"
 				itemComponent={(props) => (
 					<SelectItem item={props.item}>{props.item.textValue}</SelectItem>
