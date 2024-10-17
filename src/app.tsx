@@ -33,7 +33,7 @@ export default function App() {
 				</MetaProvider>
 			)}
 		>
-			<Show when={session()} fallback={<Route component={Login} />}>
+			<Show when={session()} fallback={<Route path="*" component={Login} />}>
 				<FileRoutes />
 			</Show>
 		</Router>
