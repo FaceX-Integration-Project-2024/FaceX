@@ -25,7 +25,7 @@ export default function TrackingPage() {
 	const [selectedBlockId, setSelectedBlockId] = createSignal(1);
 	const [blockids] = createResource(async () => {
 		return getAllClassBlocksIds();
-	});
+	}, {initialValue: [1]});
 	const [attendances, { refetch }] = createResource(
 		selectedBlockId,
 		async (blockId) => {
@@ -37,11 +37,11 @@ export default function TrackingPage() {
 	return (
 		<div class="flex flex-col p-5">
 			<Title>FaceX - Tracking</Title>
-			<Select
+			<Select<number>
 				value={selectedBlockId()}
 				onChange={setSelectedBlockId}
 				options={
-					blockids() ? blockids().map((id) => id.toString()) : ["loading"]
+					blockids()
 				}
 				placeholder="Select a class block"
 				itemComponent={(props) => (

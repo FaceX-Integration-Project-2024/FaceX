@@ -15,10 +15,10 @@ async function fetchData<T>(rpcName: string): Promise<T> {
 }
 
 export async function getAllClassBlocksIds() {
-	return fetchData<Array<BigInt>>("get_all_class_block_ids");
+	return fetchData<Array<number>>("get_all_class_block_ids");
 }
 
-export async function getAttendanceForClassBlock(class_block_id: Number) {
+export async function getAttendanceForClassBlock(class_block_id: number) {
 	const { data, error } = await supabase.rpc("get_attendance_for_class_block", {
 		p_block_id: class_block_id,
 	});
