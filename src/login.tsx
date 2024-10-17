@@ -1,8 +1,8 @@
 import { createSignal } from "solid-js";
 import { supabase } from "./supabase-client";
 
-import { Button } from "~/components/ui/button";
 import { IoLogoMicrosoft } from "solid-icons/io";
+import { Button } from "~/components/ui/button";
 
 export default function Login() {
 	const [loading, setLoading] = createSignal(false);
@@ -33,7 +33,7 @@ export default function Login() {
 			<div class="h-max" aria-live="polite">
 				<h1 class="header">Login page</h1>
 				<Button onClick={handleLogin} disabled={loading()}>
-					<IoLogoMicrosoft class="mr-2"/>
+					<IoLogoMicrosoft class="mr-2" />
 					Login with Microsoft
 				</Button>
 			</div>
