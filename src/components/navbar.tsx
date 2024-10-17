@@ -7,21 +7,19 @@ import {
 import { RiMediaWebcamLine } from "solid-icons/ri";
 import { createResource } from "solid-js";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger
-} from "~/components/ui/dropdown-menu"
-import {supabase} from "~/supabase-client";
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuLabel,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
+import { supabase } from "~/supabase-client";
 
 export default function Navbar() {
-	const [user, { refetch }] = createResource(
-		async () => {
-			return supabase.auth.getUser();
-		},
-	);
+	const [user, { refetch }] = createResource(async () => {
+		return supabase.auth.getUser();
+	});
 	const location = useLocation();
 
 	return (
@@ -70,8 +68,11 @@ export default function Navbar() {
 							<DropdownMenuLabel>My Account</DropdownMenuLabel>
 							<DropdownMenuLabel>{user()?.data?.user?.email}</DropdownMenuLabel>
 							<DropdownMenuSeparator />
-							<DropdownMenuItem class="!text-red-600" onSelect={() => supabase.auth.signOut()}>
-								<IoLogOutOutline class="w-5 h-5 mr-1"/>
+							<DropdownMenuItem
+								class="!text-red-600"
+								onSelect={() => supabase.auth.signOut()}
+							>
+								<IoLogOutOutline class="w-5 h-5 mr-1" />
 								Log out
 							</DropdownMenuItem>
 						</DropdownMenuContent>
