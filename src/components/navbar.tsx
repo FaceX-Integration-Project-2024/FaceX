@@ -1,11 +1,23 @@
+import { useColorMode } from "@kobalte/core";
 import { useLocation } from "@solidjs/router";
 import {
 	IoCheckmarkCircleOutline,
 	IoLogOutOutline,
+	IoMoonOutline,
 	IoPersonCircleOutline,
+	IoSunnyOutline,
 } from "solid-icons/io";
 import { RiMediaWebcamLine } from "solid-icons/ri";
-import { createResource } from "solid-js";
+import { Show, createResource, createSignal } from "solid-js";
+import { Button } from "~/components/ui/button";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "~/components/ui/dialog";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -21,9 +33,13 @@ export default function Navbar() {
 		return supabase.auth.getUser();
 	});
 	const location = useLocation();
+	const { colorMode, setColorMode } = useColorMode();
+	const [open, setOpen] = createSignal(false);
 
 	return (
-		<nav class="flex items-right justify-between p-4 bg-gray-100 shadow-md rounded-lg">
+		<nav
+			class={`flex items-right justify-between p-4 ${colorMode() === "light" ? "bg-gray-100" : "bg-gray-900"} shadow-md`}
+		>
 			<div class="flex items-center">
 				<a href="/" class="flex flex-row font-bold text-lg">
 					<RiMediaWebcamLine class="w-8 h-8 mr-1" />
@@ -69,14 +85,48 @@ export default function Navbar() {
 							<DropdownMenuLabel>{user()?.data?.user?.email}</DropdownMenuLabel>
 							<DropdownMenuSeparator />
 							<DropdownMenuItem
+								onSelect={() =>
+									setColorMode(colorMode() === "light" ? "dark" : "light")
+								}
+							>
+								<Show
+									when={colorMode() === "light"}
+									fallback={<IoMoonOutline class="w-5 h-5 mr-1" />}
+								>
+									<IoSunnyOutline class="w-5 h-5 mr-1" />
+								</Show>
+								Toggle theme
+							</DropdownMenuItem>
+							<DropdownMenuItem
 								class="!text-red-600"
-								onSelect={() => supabase.auth.signOut()}
+								onSelect={() => setOpen(true)}
 							>
 								<IoLogOutOutline class="w-5 h-5 mr-1" />
 								Log out
 							</DropdownMenuItem>
 						</DropdownMenuContent>
 					</DropdownMenu>
+					<Dialog open={open()} onOpenChange={setOpen}>
+						<DialogContent>
+							<DialogHeader>
+								<DialogTitle>Are you sure ?</DialogTitle>
+								<DialogDescription>
+									You are about to be disconnected.
+								</DialogDescription>
+							</DialogHeader>
+							<DialogFooter>
+								<Button
+									variant="destructive"
+									onClick={() => supabase.auth.signOut()}
+								>
+									Confirm
+								</Button>
+								<Button variant="secondary" onClick={() => setOpen(false)}>
+									Cancel
+								</Button>
+							</DialogFooter>
+						</DialogContent>
+					</Dialog>
 				</div>
 			</div>
 		</nav>
