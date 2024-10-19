@@ -1,11 +1,14 @@
+import { useColorMode } from "@kobalte/core";
 import { useLocation } from "@solidjs/router";
 import {
 	IoCheckmarkCircleOutline,
 	IoLogOutOutline,
+	IoMoonOutline,
 	IoPersonCircleOutline,
+	IoSunnyOutline,
 } from "solid-icons/io";
 import { RiMediaWebcamLine } from "solid-icons/ri";
-import { createResource } from "solid-js";
+import { Show, createResource } from "solid-js";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -21,9 +24,12 @@ export default function Navbar() {
 		return supabase.auth.getUser();
 	});
 	const location = useLocation();
+	const { colorMode, setColorMode } = useColorMode();
 
 	return (
-		<nav class="flex items-right justify-between p-4 bg-gray-100 shadow-md rounded-lg">
+		<nav
+			class={`flex items-right justify-between p-4 ${colorMode() === "light" ? "bg-gray-100" : "bg-gray-900"} shadow-md`}
+		>
 			<div class="flex items-center">
 				<a href="/" class="flex flex-row font-bold text-lg">
 					<RiMediaWebcamLine class="w-8 h-8 mr-1" />
@@ -68,6 +74,19 @@ export default function Navbar() {
 							<DropdownMenuLabel>My Account</DropdownMenuLabel>
 							<DropdownMenuLabel>{user()?.data?.user?.email}</DropdownMenuLabel>
 							<DropdownMenuSeparator />
+							<DropdownMenuItem
+								onSelect={() =>
+									setColorMode(colorMode() === "light" ? "dark" : "light")
+								}
+							>
+								<Show
+									when={colorMode() === "light"}
+									fallback={<IoMoonOutline class="w-5 h-5 mr-1" />}
+								>
+									<IoSunnyOutline class="w-5 h-5 mr-1" />
+								</Show>
+								Toggle theme
+							</DropdownMenuItem>
 							<DropdownMenuItem
 								class="!text-red-600"
 								onSelect={() => supabase.auth.signOut()}
