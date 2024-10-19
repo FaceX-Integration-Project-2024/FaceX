@@ -8,7 +8,16 @@ import {
 	IoSunnyOutline,
 } from "solid-icons/io";
 import { RiMediaWebcamLine } from "solid-icons/ri";
-import { Show, createResource } from "solid-js";
+import { Show, createResource, createSignal } from "solid-js";
+import { Button } from "~/components/ui/button";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "~/components/ui/dialog";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -25,6 +34,7 @@ export default function Navbar() {
 	});
 	const location = useLocation();
 	const { colorMode, setColorMode } = useColorMode();
+	const [open, setOpen] = createSignal(false);
 
 	return (
 		<nav
@@ -89,13 +99,34 @@ export default function Navbar() {
 							</DropdownMenuItem>
 							<DropdownMenuItem
 								class="!text-red-600"
-								onSelect={() => supabase.auth.signOut()}
+								onSelect={() => setOpen(true)}
 							>
 								<IoLogOutOutline class="w-5 h-5 mr-1" />
 								Log out
 							</DropdownMenuItem>
 						</DropdownMenuContent>
 					</DropdownMenu>
+					<Dialog open={open()} onOpenChange={setOpen}>
+						<DialogContent>
+							<DialogHeader>
+								<DialogTitle>Are you sure ?</DialogTitle>
+								<DialogDescription>
+									You are about to be disconnected.
+								</DialogDescription>
+							</DialogHeader>
+							<DialogFooter>
+								<Button
+									variant="destructive"
+									onClick={() => supabase.auth.signOut()}
+								>
+									Confirm
+								</Button>
+								<Button variant="secondary" onClick={() => setOpen(false)}>
+									Cancel
+								</Button>
+							</DialogFooter>
+						</DialogContent>
+					</Dialog>
 				</div>
 			</div>
 		</nav>
