@@ -18,6 +18,7 @@ import {
 	cookieStorageManagerSSR,
 } from "@kobalte/core";
 import { getCookie } from "vinxi/http";
+import { UserContextProvider } from "./components/context";
 
 function getServerCookies() {
 	"use server";
@@ -44,14 +45,16 @@ export default function App() {
 		<Router
 			root={(props) => (
 				<MetaProvider>
-					<ColorModeScript storageType={storageManager.type} />
-					<ColorModeProvider storageManager={storageManager}>
-						<Title>FaceX</Title>
-						<Show when={session()}>
-							<Navbar />
-						</Show>
-						<Suspense>{props.children}</Suspense>
-					</ColorModeProvider>
+					<UserContextProvider>
+						<ColorModeScript storageType={storageManager.type} />
+						<ColorModeProvider storageManager={storageManager}>
+							<Title>FaceX</Title>
+							<Show when={session()}>
+								<Navbar />
+							</Show>
+							<Suspense>{props.children}</Suspense>
+						</ColorModeProvider>
+					</UserContextProvider>
 				</MetaProvider>
 			)}
 		>
