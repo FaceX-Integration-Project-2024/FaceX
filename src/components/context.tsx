@@ -33,7 +33,6 @@ export function UserContextProvider(props: ComponentProps<FlowComponent>) {
 		const { data } = await supabase.auth.getUser();
 		const userEmail = data?.user?.email;
 		const userData = getUserByEmail(userEmail);
-		console.log(userData);
 		return userData as Promise<User>;
 	});
 
