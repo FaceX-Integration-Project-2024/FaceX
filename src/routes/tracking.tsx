@@ -20,6 +20,7 @@ import {
 import {
 	getAllClassBlocksIds,
 	getAttendanceForClassBlock,
+	getPictureUrl,
 } from "~/supabase-client";
 
 export default function TrackingPage() {
@@ -62,9 +63,12 @@ export default function TrackingPage() {
 				>
 					<For each={attendances()}>
 						{(attendance) => (
-							<Card class="flex flex-col justify-center items-center w-52 space-y-3">
-								<Avatar class="w-48 h-48 p-5">
-									<AvatarImage src="https://bucketurl.facex/matricule.jpg" />
+							<Card class="flex flex-col justify-center items-center space-y-3 p-5">
+								<Avatar class="w-48 h-48">
+									<AvatarImage
+										src={getPictureUrl(`students/${attendance.matricule}.jpg`)}
+										class=" object-cover w-48 h-48"
+									/>
 									<AvatarFallback>Photo</AvatarFallback>
 								</Avatar>
 								<CardTitle>{attendance.student_full_name}</CardTitle>
