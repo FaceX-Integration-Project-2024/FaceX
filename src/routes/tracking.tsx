@@ -71,7 +71,7 @@ export default function TrackingPage() {
 								<CardFooter>
 									<Badge
 										onClick={() => console.log("working")}
-										class={`${attendance.attendance_status === "Present" ? "bg-green-600 hover:bg-green-800" : ""} cursor-pointer`}
+										class={`${attendance.attendance_status === "Present" ? "bg-green-600 text-white hover:bg-green-800" : ""} cursor-pointer`}
 										variant={
 											attendance.attendance_status === "Present"
 												? "default"
