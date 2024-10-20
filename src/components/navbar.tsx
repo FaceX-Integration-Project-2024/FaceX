@@ -27,11 +27,10 @@ import {
 	DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { supabase } from "~/supabase-client";
+import { UserContextProvider, useUserContext } from "./context";
 
 export default function Navbar() {
-	const [user, { refetch }] = createResource(async () => {
-		return supabase.auth.getUser();
-	});
+	const { user } = useUserContext();
 	const location = useLocation();
 	const { colorMode, setColorMode } = useColorMode();
 	const [open, setOpen] = createSignal(false);
@@ -82,7 +81,7 @@ export default function Navbar() {
 						</DropdownMenuTrigger>
 						<DropdownMenuContent>
 							<DropdownMenuLabel>My Account</DropdownMenuLabel>
-							<DropdownMenuLabel>{user()?.data?.user?.email}</DropdownMenuLabel>
+							<DropdownMenuLabel>{user()?.email}</DropdownMenuLabel>
 							<DropdownMenuSeparator />
 							<DropdownMenuItem
 								onSelect={() =>
