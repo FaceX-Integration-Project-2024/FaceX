@@ -1,6 +1,7 @@
 import { Title } from "@solidjs/meta";
 import { For, Show, createResource, createSignal } from "solid-js";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import { Badge } from "~/components/ui/badge";
 import {
 	Card,
 	CardContent,
@@ -61,20 +62,24 @@ export default function TrackingPage() {
 				>
 					<For each={attendances()}>
 						{(attendance) => (
-							<Card class="flex flex-col justify-center items-center w-52">
+							<Card class="flex flex-col justify-center items-center w-52 space-y-3">
 								<Avatar class="w-48 h-48 p-5">
 									<AvatarImage src="https://bucketurl.facex/matricule.jpg" />
 									<AvatarFallback>Photo</AvatarFallback>
 								</Avatar>
 								<CardTitle>{attendance.student_full_name}</CardTitle>
-								<CardFooter
-									class={
-										attendance.attendance_status === "Present"
-											? "text-green-600"
-											: "text-red-600"
-									}
-								>
-									{attendance.attendance_status}
+								<CardFooter>
+									<Badge
+										onClick={() => console.log("working")}
+										class={`${attendance.attendance_status === "Present" ? "bg-green-600 text-white hover:bg-green-800" : ""} cursor-pointer`}
+										variant={
+											attendance.attendance_status === "Present"
+												? "default"
+												: "destructive"
+										}
+									>
+										{attendance.attendance_status}
+									</Badge>
 								</CardFooter>
 							</Card>
 						)}

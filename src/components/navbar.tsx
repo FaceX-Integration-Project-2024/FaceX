@@ -38,7 +38,7 @@ export default function Navbar() {
 
 	return (
 		<nav
-			class={`flex items-right justify-between p-4 ${colorMode() === "light" ? "bg-gray-100" : "bg-gray-900"} shadow-md`}
+			class={`flex items-right justify-between p-4 ${colorMode() === "light" ? "bg-gray-100" : "bg-gray-900"} shadow-md sticky top-0 z-50`}
 		>
 			<div class="flex items-center">
 				<a href="/" class="flex flex-row font-bold text-lg">
