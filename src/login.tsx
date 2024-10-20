@@ -1,12 +1,11 @@
 import { createSignal } from "solid-js";
 import { supabase } from "./supabase-client";
 
+import { IoLogoMicrosoft } from "solid-icons/io";
 import { Button } from "~/components/ui/button";
 
 export default function Login() {
 	const [loading, setLoading] = createSignal(false);
-	const [email, setEmail] = createSignal("");
-
 	const handleLogin = async (e: MouseEvent) => {
 		e.preventDefault();
 
@@ -30,10 +29,13 @@ export default function Login() {
 	};
 
 	return (
-		<div class="row flex-center flex">
-			<div class="col-6 form-widget" aria-live="polite">
-				<h1 class="header">Supabase + SolidJS</h1>
-				<Button onClick={handleLogin}>Login with Microsoft</Button>
+		<div class="flex flex-center justify-center items-center h-[100dvh] w-[100dvw]">
+			<div class="h-max" aria-live="polite">
+				<h1 class="header">Login page</h1>
+				<Button onClick={handleLogin} disabled={loading()}>
+					<IoLogoMicrosoft class="mr-2" />
+					Login with Microsoft
+				</Button>
 			</div>
 		</div>
 	);
