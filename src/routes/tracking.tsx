@@ -28,7 +28,7 @@ export default function TrackingPage() {
 	const { user } = useUserContext();
 	return (
 		<Show
-			when={["instructor", "admin"].includes(user()?.role) || true}
+			when={["instructor", "admin"].includes(user()?.role || "") || true}
 			fallback={<StudentView />}
 		>
 			<InstructorView />
@@ -80,7 +80,9 @@ function InstructorView() {
 								<Card class="flex flex-col justify-center items-center space-y-3 p-5 min-w-fit">
 									<Avatar class="w-28 h-28">
 										<AvatarImage
-											src={getPictureUrl(`students/${attendance.matricule}.jpg`)}
+											src={getPictureUrl(
+												`students/${attendance.matricule}.jpg`,
+											)}
 											class="object-cover w-28 h-28"
 										/>
 										<AvatarFallback>Photo</AvatarFallback>
