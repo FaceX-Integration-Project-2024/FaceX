@@ -2,6 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const storageBucket = "id-pictures";
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
@@ -40,4 +41,30 @@ export async function getAttendanceForClassBlock(class_block_id: number) {
 		);
 	}
 	return data;
+}
+
+export async function updateAttendanceForClassBlock(
+	student_email: string,
+	class_block_id: number,
+	status: string,
+) {
+	const { data, error } = await supabase.rpc("update_attendance", {
+		p_student_email: student_email,
+		p_block_id: class_block_id,
+		p_status: status,
+	});
+	if (error) {
+		throw new Error(
+			`Error fetching data for update_attendance: ${error.message}`,
+		);
+	}
+	return data;
+}
+
+export function getPictureUrl(picturePath: string) {
+	const { data } = supabase.storage
+		.from(storageBucket)
+		.getPublicUrl(picturePath);
+
+	return data.publicUrl;
 }

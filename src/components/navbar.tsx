@@ -80,7 +80,7 @@ export default function Navbar() {
 							<IoPersonCircleOutline class="w-6 h-6 mr-1" />
 						</DropdownMenuTrigger>
 						<DropdownMenuContent>
-							<DropdownMenuLabel>My Account</DropdownMenuLabel>
+							<DropdownMenuLabel>{`My Account -  ${user()?.role}`}</DropdownMenuLabel>
 							<DropdownMenuLabel>{user()?.email}</DropdownMenuLabel>
 							<DropdownMenuSeparator />
 							<DropdownMenuItem
