@@ -3,20 +3,17 @@ import { For, Show, createResource, createSignal } from "solid-js";
 import { useUserContext } from "~/components/context";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Badge } from "~/components/ui/badge";
-import { Button } from "~/components/ui/button";
 import {
 	Card,
 	CardContent,
 	CardDescription,
 	CardFooter,
-	CardHeader,
 	CardTitle,
 } from "~/components/ui/card";
 import {
 	Dialog,
 	DialogContent,
 	DialogDescription,
-	DialogFooter,
 	DialogHeader,
 	DialogTitle,
 } from "~/components/ui/dialog";
@@ -71,7 +68,6 @@ function InstructorView() {
 		null,
 	);
 
-	// @ts-ignore
 	return (
 		<div class="flex flex-col p-5">
 			<Title>FaceX - Tracking</Title>
