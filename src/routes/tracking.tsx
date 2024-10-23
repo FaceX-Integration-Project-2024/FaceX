@@ -28,7 +28,8 @@ import {
 	getAllClassBlocksIds,
 	getAttendanceForClassBlock,
 	getPictureUrl,
-	supabase, updateAttendanceForClassBlock,
+	supabase,
+	updateAttendanceForClassBlock,
 } from "~/supabase-client";
 
 interface Attendance {
@@ -144,7 +145,15 @@ function InstructorView() {
 									<CardTitle>{attendance.student_full_name}</CardTitle>
 									<CardFooter>
 										<Badge
-											onClick={() => updateAttendanceForClassBlock(attendance.student_email, selectedBlockId(), attendance.attendance_status === "Present" ? "Absent" : "Present")}
+											onClick={() =>
+												updateAttendanceForClassBlock(
+													attendance.student_email,
+													selectedBlockId(),
+													attendance.attendance_status === "Present"
+														? "Absent"
+														: "Present",
+												)
+											}
 											class={`${attendance.attendance_status === "Present" ? "bg-green-600 text-white hover:bg-green-800" : ""} cursor-pointer`}
 											variant={
 												attendance.attendance_status === "Present"
