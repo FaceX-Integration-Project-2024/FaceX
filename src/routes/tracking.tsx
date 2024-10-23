@@ -1,5 +1,5 @@
 import { Title } from "@solidjs/meta";
-import { For, Show, createResource, createSignal } from "solid-js";
+import { For, Show, createResource, createSignal, onCleanup } from "solid-js";
 import { useUserContext } from "~/components/context";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Badge } from "~/components/ui/badge";
@@ -28,6 +28,7 @@ import {
 	getAllClassBlocksIds,
 	getAttendanceForClassBlock,
 	getPictureUrl,
+    supabase,
 } from "~/supabase-client";
 
 interface Attendance {
@@ -68,6 +69,25 @@ function InstructorView() {
 		null,
 	);
 
+	// Handle real-time inserts, updates and deletes
+	const handleAttendanceChange = (payload:any) => {
+		console.log("Change received!", payload);
+		refetch(); // Re-fetch the attendances data whenever a change is detected
+	};
+
+	// Subscribe to real-time updates
+	const attendanceChannel = supabase
+		.channel('attendance')
+		.on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'attendance' }, handleAttendanceChange)
+		.on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'attendance' }, handleAttendanceChange)
+		.on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'attendance' }, handleAttendanceChange)
+		.subscribe();
+
+	// Clean up subscription when the component is destroyed
+	onCleanup(() => {
+		attendanceChannel.unsubscribe();
+	});
+
 	return (
 		<div class="flex flex-col p-5">
 			<Title>FaceX - Tracking</Title>
@@ -95,7 +115,7 @@ function InstructorView() {
 							{(attendance) => (
 								<Card class="flex flex-col justify-center items-center space-y-3 p-2 min-w-fit">
 									<Avatar
-										class="w-28 h-28"
+										class="w-28 h-28 cursor-pointer"
 										onClick={() => {
 											setSelectedStudent(attendance);
 											setOpen(true);
