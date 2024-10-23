@@ -28,7 +28,7 @@ import {
 	getAllClassBlocksIds,
 	getAttendanceForClassBlock,
 	getPictureUrl,
-    supabase,
+	supabase, updateAttendanceForClassBlock,
 } from "~/supabase-client";
 
 interface Attendance {
@@ -41,7 +41,7 @@ export default function TrackingPage() {
 	const { user } = useUserContext();
 	return (
 		<Show
-			when={["instructor", "admin"].includes(user()?.role || "") || true}
+			when={["instructor", "admin"].includes(user()?.role || "") || true} //disabled
 			fallback={<StudentView />}
 		>
 			<InstructorView />
@@ -70,17 +70,29 @@ function InstructorView() {
 	);
 
 	// Handle real-time inserts, updates and deletes
-	const handleAttendanceChange = (payload:any) => {
-		console.log("Change received!", payload);
+	const handleAttendanceChange = (payload: any) => {
+		// console.log("Change received!", payload);
 		refetch(); // Re-fetch the attendances data whenever a change is detected
 	};
 
 	// Subscribe to real-time updates
 	const attendanceChannel = supabase
-		.channel('attendance')
-		.on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'attendance' }, handleAttendanceChange)
-		.on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'attendance' }, handleAttendanceChange)
-		.on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'attendance' }, handleAttendanceChange)
+		.channel("attendance")
+		.on(
+			"postgres_changes",
+			{ event: "INSERT", schema: "public", table: "attendance" },
+			handleAttendanceChange,
+		)
+		.on(
+			"postgres_changes",
+			{ event: "UPDATE", schema: "public", table: "attendance" },
+			handleAttendanceChange,
+		)
+		.on(
+			"postgres_changes",
+			{ event: "DELETE", schema: "public", table: "attendance" },
+			handleAttendanceChange,
+		)
 		.subscribe();
 
 	// Clean up subscription when the component is destroyed
@@ -132,7 +144,7 @@ function InstructorView() {
 									<CardTitle>{attendance.student_full_name}</CardTitle>
 									<CardFooter>
 										<Badge
-											onClick={() => console.log("working")}
+											onClick={() => updateAttendanceForClassBlock(attendance.student_email, selectedBlockId(), attendance.attendance_status === "Present" ? "Absent" : "Present")}
 											class={`${attendance.attendance_status === "Present" ? "bg-green-600 text-white hover:bg-green-800" : ""} cursor-pointer`}
 											variant={
 												attendance.attendance_status === "Present"
@@ -166,10 +178,10 @@ function InstructorView() {
 								<DialogTitle>
 									{selectedStudent()?.student_full_name}
 								</DialogTitle>
-								<DialogDescription>
-									Matricule : {selectedStudent()?.matricule} <br />
-									Classe : 3TL1 <br />
-									Statut : {selectedStudent()?.attendance_status}
+								<DialogDescription class="flex flex-col">
+									<span>Matricule : {selectedStudent()?.matricule}</span>
+									<span>Classe : 3TL1</span>
+									<span>Statut : {selectedStudent()?.attendance_status}</span>
 								</DialogDescription>
 							</DialogHeader>
 						</div>
@@ -181,5 +193,5 @@ function InstructorView() {
 }
 
 function StudentView() {
-	return "Faire la vue étudiant ici";
+	return "This is the student view";
 }

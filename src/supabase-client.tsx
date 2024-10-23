@@ -43,6 +43,20 @@ export async function getAttendanceForClassBlock(class_block_id: number) {
 	return data;
 }
 
+export async function updateAttendanceForClassBlock(student_email: string, class_block_id: number, status: string) {
+	const { data, error } = await supabase.rpc("update_attendance", {
+		p_student_email: student_email,
+		p_block_id: class_block_id,
+		p_status: status,
+	});
+	if (error) {
+		throw new Error(
+			`Error fetching data for update_attendance: ${error.message}`,
+		);
+	}
+	return data;
+}
+
 export function getPictureUrl(picturePath: string) {
 	const { data } = supabase.storage
 		.from(storageBucket)
