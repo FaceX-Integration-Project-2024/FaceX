@@ -3,6 +3,7 @@ import { For, Show, createResource, createSignal } from "solid-js";
 import { useUserContext } from "~/components/context";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
 import {
 	Card,
 	CardContent,
@@ -11,6 +12,14 @@ import {
 	CardHeader,
 	CardTitle,
 } from "~/components/ui/card";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "~/components/ui/dialog";
 import {
 	Select,
 	SelectContent,
@@ -23,6 +32,12 @@ import {
 	getAttendanceForClassBlock,
 	getPictureUrl,
 } from "~/supabase-client";
+
+interface Attendance {
+	matricule: string;
+	student_full_name: string;
+	attendance_status: string;
+}
 
 export default function TrackingPage() {
 	const { user } = useUserContext();
@@ -51,7 +66,12 @@ function InstructorView() {
 			return getAttendanceForClassBlock(blockId);
 		},
 	);
+	const [open, setOpen] = createSignal(false);
+	const [selectedStudent, setSelectedStudent] = createSignal<Attendance | null>(
+		null,
+	);
 
+	// @ts-ignore
 	return (
 		<div class="flex flex-col p-5">
 			<Title>FaceX - Tracking</Title>
@@ -70,15 +90,21 @@ function InstructorView() {
 				<SelectContent />
 			</Select>
 			<div class="flex justify-center">
-				<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 m-5 gap-5 max-w-screen-xl">
+				<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 m-5 gap-5 max-w-screen-2xl">
 					<Show
 						when={attendances() && Object.keys(attendances()).length !== 0}
 						fallback={"No Data"}
 					>
 						<For each={attendances()}>
 							{(attendance) => (
-								<Card class="flex flex-col justify-center items-center space-y-3 p-5 min-w-fit">
-									<Avatar class="w-28 h-28">
+								<Card class="flex flex-col justify-center items-center space-y-3 p-2 min-w-fit">
+									<Avatar
+										class="w-28 h-28"
+										onClick={() => {
+											setSelectedStudent(attendance);
+											setOpen(true);
+										}}
+									>
 										<AvatarImage
 											src={getPictureUrl(
 												`students/${attendance.matricule}.jpg`,
@@ -107,6 +133,33 @@ function InstructorView() {
 					</Show>
 				</div>
 			</div>
+			<Dialog open={open()} onOpenChange={setOpen}>
+				<DialogContent>
+					<div class="flex items-start space-x-4">
+						<Avatar class="w-32 h-32">
+							<AvatarImage
+								src={getPictureUrl(
+									`students/${selectedStudent()?.matricule}.jpg`,
+								)}
+								class="object-cover w-32 h-32"
+							/>
+							<AvatarFallback>Photo</AvatarFallback>
+						</Avatar>
+						<div class="flex flex-col justify-center">
+							<DialogHeader>
+								<DialogTitle>
+									{selectedStudent()?.student_full_name}
+								</DialogTitle>
+								<DialogDescription>
+									Matricule : {selectedStudent()?.matricule} <br />
+									Classe : 3TL1 <br />
+									Statut : {selectedStudent()?.attendance_status}
+								</DialogDescription>
+							</DialogHeader>
+						</div>
+					</div>
+				</DialogContent>
+			</Dialog>
 		</div>
 	);
 }
