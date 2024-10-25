@@ -1,7 +1,6 @@
 import {
 	type ComponentProps,
 	type FlowComponent,
-	JSXElement,
 	createContext,
 	createResource,
 	useContext,
