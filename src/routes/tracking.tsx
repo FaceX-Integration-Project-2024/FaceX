@@ -232,11 +232,11 @@ function StudentView() {
 		);
 
 	// Exemple de fonction pour mettre à jour l'email
-	const handleEmailChange = (newEmail:string) => {
+	const handleEmailChange = (newEmail: string) => {
 		setStudentEmail(newEmail); // met à jour l'email, déclenchant la resource pour recharger les présences
 	};
 
-	const attendanceChannel = supabase
+	const emailChannel = supabase
 		.channel("attendance")
 		.on(
 			"postgres_changes",
@@ -256,12 +256,12 @@ function StudentView() {
 		.subscribe();
 
 	onCleanup(() => {
-		attendanceChannel.unsubscribe();
+		emailChannel.unsubscribe();
 	});
 
 	// Affiche la liste des présences
 	return (
-		<div class = "p-1 rounded-lg shadow-md">
+		<div class="p-1 rounded-lg shadow-md">
 			<h2>Liste des présences</h2>
 			<For each={studentAttendances()}>
 				{(attendance) => (
