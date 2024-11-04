@@ -1,6 +1,13 @@
 import { Title } from "@solidjs/meta";
-import { For, Show, createResource, createSignal, onCleanup } from "solid-js";
-import { useUserContext } from "~/components/context";
+import {
+	For,
+	Show,
+	createResource,
+	createSignal,
+	onCleanup,
+	onMount,
+} from "solid-js";
+import { getSessionEmail, useUserContext } from "~/components/context";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Badge } from "~/components/ui/badge";
 import {
@@ -26,6 +33,7 @@ import {
 } from "~/components/ui/select";
 import {
 	getAllClassBlocksIds,
+	getAttendanceByEmail,
 	getAttendanceForClassBlock,
 	getPictureUrl,
 	supabase,
@@ -42,7 +50,7 @@ export default function TrackingPage() {
 	const { user } = useUserContext();
 	return (
 		<Show
-			when={["instructor", "admin"].includes(user()?.role || "") || true} //disabled
+			when={["instructor", "admin"].includes(user()?.role || "")} //disabled
 			fallback={<StudentView />}
 		>
 			<InstructorView />
@@ -202,5 +210,89 @@ function InstructorView() {
 }
 
 function StudentView() {
-	return "This is the student view";
+	const [studentEmail, setStudentEmail] = createSignal("");
+
+	onMount(() => {
+		const email = getSessionEmail();
+		if (email) {
+			setStudentEmail(email); // Initialiser le signal avec l'email utilisateur
+		}
+	});
+
+	// 2. Resource pour récupérer les présences d'un étudiant par email
+	const [studentAttendances, { refetch: refetchStudentAttendances }] =
+		createResource(
+			studentEmail, // dépend de l'email
+			async (email) => {
+				if (!email) return null;
+				const data = await getAttendanceByEmail(email);
+				console.log(data);
+				return data;
+			},
+		);
+
+	// Exemple de fonction pour mettre à jour l'email
+	const handleEmailChange = (newEmail) => {
+		setStudentEmail(newEmail); // met à jour l'email, déclenchant la resource pour recharger les présences
+	};
+
+	const attendanceChannel = supabase
+		.channel("attendance")
+		.on(
+			"postgres_changes",
+			{ event: "INSERT", schema: "public", table: "attendance" },
+			handleEmailChange,
+		)
+		.on(
+			"postgres_changes",
+			{ event: "UPDATE", schema: "public", table: "attendance" },
+			handleEmailChange,
+		)
+		.on(
+			"postgres_changes",
+			{ event: "DELETE", schema: "public", table: "attendance" },
+			handleEmailChange,
+		)
+		.subscribe();
+
+	onCleanup(() => {
+		attendanceChannel.unsubscribe();
+	});
+
+	// Affiche la liste des présences
+	return (
+		<div
+			style={{
+				padding: "1rem",
+				backgroundColor: "#f9f9f9",
+				borderRadius: "8px",
+			}}
+		>
+			<h2>Liste des présences</h2>
+			<For each={studentAttendances()}>
+				{(attendance) => (
+					<div
+						style={{
+							border: "1px solid #ddd",
+							borderRadius: "6px",
+							padding: "0.5rem",
+							marginBottom: "0.5rem",
+							backgroundColor: "#fff",
+						}}
+					>
+						<p>
+							<strong>ID :</strong> {attendance.id}
+						</p>
+						<p>
+							<strong>Statut :</strong> {attendance.status}
+						</p>
+						<p>
+							<strong>Date :</strong>{" "}
+							{new Date(attendance.timestamp).toLocaleString()}
+						</p>
+					</div>
+				)}
+			</For>
+		</div>
+	);
 }
