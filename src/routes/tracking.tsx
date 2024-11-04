@@ -232,7 +232,7 @@ function StudentView() {
 		);
 
 	// Exemple de fonction pour mettre à jour l'email
-	const handleEmailChange = (newEmail) => {
+	const handleEmailChange = (newEmail:string) => {
 		setStudentEmail(newEmail); // met à jour l'email, déclenchant la resource pour recharger les présences
 	};
 
@@ -261,25 +261,11 @@ function StudentView() {
 
 	// Affiche la liste des présences
 	return (
-		<div
-			style={{
-				padding: "1rem",
-				backgroundColor: "#f9f9f9",
-				borderRadius: "8px",
-			}}
-		>
+		<div class = "p-1 rounded-lg shadow-md">
 			<h2>Liste des présences</h2>
 			<For each={studentAttendances()}>
 				{(attendance) => (
-					<div
-						style={{
-							border: "1px solid #ddd",
-							borderRadius: "6px",
-							padding: "0.5rem",
-							marginBottom: "0.5rem",
-							backgroundColor: "#fff",
-						}}
-					>
+					<div class="border bg-transparent decoration-black rounded-lg shadow-md p-2 m-2">
 						<p>
 							<strong>ID :</strong> {attendance.id}
 						</p>
