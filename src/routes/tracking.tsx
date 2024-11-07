@@ -220,20 +220,19 @@ function StudentView() {
 	});
 
 	// 2. Resource pour récupérer les présences d'un étudiant par email
-	const [studentAttendances, { refetch: refetchStudentAttendances }] =
-		createResource(
-			studentEmail, // dépend de l'email
-			async (email) => {
-				if (!email) return null;
-				const data = await getAttendanceByEmail(email);
-				console.log(data);
-				return data;
-			},
-		);
+	const [studentAttendances, { refetch }] = createResource(
+		studentEmail, // dépend de l'email
+		async (email) => {
+			if (!email) return null;
+			const data = await getAttendanceByEmail(email);
+			console.log(data);
+			return data;
+		},
+	);
 
 	// Exemple de fonction pour mettre à jour l'email
-	const handleEmailChange = (newEmail: string) => {
-		setStudentEmail(newEmail); // met à jour l'email, déclenchant la resource pour recharger les présences
+	const handleEmailChange = (payload: any) => {
+		refetch(); // met à jour l'email, déclenchant la resource pour recharger les présences
 	};
 
 	const emailChannel = supabase
