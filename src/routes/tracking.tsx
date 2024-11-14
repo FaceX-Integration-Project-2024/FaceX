@@ -81,7 +81,9 @@ function InstructorView() {
 	// Handle real-time inserts, updates and deletes
 	const handleAttendanceChange = (payload: any) => {
 		// console.log("Change received!", payload);
-		refetch(); // Re-fetch the attendances data whenever a change is detected
+		if (payload.new.block_id === selectedBlockId()) {
+			refetch(); // Re-fetch the attendances data whenever a change is detected related to the selected class block
+		}
 	};
 
 	// Subscribe to real-time updates
@@ -90,17 +92,17 @@ function InstructorView() {
 		.on(
 			"postgres_changes",
 			{ event: "INSERT", schema: "public", table: "attendance" },
-			handleAttendanceChange,
+			(payload) => handleAttendanceChange(payload),
 		)
 		.on(
 			"postgres_changes",
 			{ event: "UPDATE", schema: "public", table: "attendance" },
-			handleAttendanceChange,
+			(payload) => handleAttendanceChange(payload),
 		)
 		.on(
 			"postgres_changes",
 			{ event: "DELETE", schema: "public", table: "attendance" },
-			handleAttendanceChange,
+			(payload) => handleAttendanceChange(payload),
 		)
 		.subscribe();
 
@@ -230,32 +232,36 @@ function StudentView() {
 		},
 	);
 
-	// Exemple de fonction pour mettre à jour l'email
-	const handleEmailChange = (payload: any) => {
-		refetch(); // met à jour l'email, déclenchant la resource pour recharger les présences
+	const handleAttendanceChange = (payload: any) => {
+		// console.log("Change received!", payload);
+		if (payload.new.student_email === studentEmail()) {
+			refetch(); // Re-fetch the attendances data whenever a change is detected related to connected student
+		}
 	};
 
-	const emailChannel = supabase
+	// Subscribe to real-time updates
+	const attendanceChannel = supabase
 		.channel("attendance")
 		.on(
 			"postgres_changes",
 			{ event: "INSERT", schema: "public", table: "attendance" },
-			handleEmailChange,
+			(payload) => handleAttendanceChange(payload),
 		)
 		.on(
 			"postgres_changes",
 			{ event: "UPDATE", schema: "public", table: "attendance" },
-			handleEmailChange,
+			(payload) => handleAttendanceChange(payload),
 		)
 		.on(
 			"postgres_changes",
 			{ event: "DELETE", schema: "public", table: "attendance" },
-			handleEmailChange,
+			(payload) => handleAttendanceChange(payload),
 		)
 		.subscribe();
 
+	// Clean up subscription when the component is destroyed
 	onCleanup(() => {
-		emailChannel.unsubscribe();
+		attendanceChannel.unsubscribe();
 	});
 
 	// Affiche la liste des présences
