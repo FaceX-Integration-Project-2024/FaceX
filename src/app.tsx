@@ -18,6 +18,7 @@ import {
 	cookieStorageManagerSSR,
 } from "@kobalte/core";
 import { getCookie } from "vinxi/http";
+import LoginNavbar from "~/components/login-navbar";
 import { UserContextProvider } from "./components/context";
 
 function getServerCookies() {
@@ -51,6 +52,9 @@ export default function App() {
 							<Title>FaceX</Title>
 							<Show when={session()}>
 								<Navbar />
+							</Show>
+							<Show when={!session()}>
+								<LoginNavbar />
 							</Show>
 							<Suspense>{props.children}</Suspense>
 						</ColorModeProvider>
