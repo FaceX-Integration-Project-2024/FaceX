@@ -1,7 +1,7 @@
 export default function Login() {
 	return (
 		<section class="container mx-auto px-4 py-16 text-center">
-			<div class="bg-white shadow-md rounded-lg overflow-hidden">
+			<div class="shadow-md rounded-lg overflow-hidden">
 				<div class="md:flex">
 					<div
 						class="md:w-1/2 bg-cover bg-center"
@@ -9,10 +9,8 @@ export default function Login() {
 					/>
 
 					<div class="md:w-1/2 p-8">
-						<h2 class="text-3xl font-bold text-gray-800 mb-4">
-							Bienvenue sur FaceX
-						</h2>
-						<p class="text-gray-600 mb-6">
+						<h2 class="text-3xl font-bold mb-4">Bienvenue sur FaceX</h2>
+						<p class="mb-6">
 							Bienvenue sur notre plateforme de prise de présence automatisée.
 							Ce projet innovant repose sur l’utilisation de caméras
 							intelligentes associées à un algorithme de reconnaissance faciale

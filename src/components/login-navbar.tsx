@@ -50,7 +50,7 @@ export default function LoginNavbar() {
 					<Button
 						onClick={handleLogin}
 						disabled={loading()}
-						onKeyDown={(e:KeyboardEvent) => e.key === "Enter" && handleLogin}
+						onKeyDown={(e: KeyboardEvent) => e.key === "Enter" && handleLogin}
 						role="button"
 						tabIndex={0}
 					>
@@ -63,7 +63,7 @@ export default function LoginNavbar() {
 					onClick={() =>
 						setColorMode(colorMode() === "light" ? "dark" : "light")
 					}
-					onKeyDown={(e:KeyboardEvent) => e.key === "Enter" && handleLogin}
+					onKeyDown={(e: KeyboardEvent) => e.key === "Enter" && handleLogin}
 					tabIndex={0}
 				>
 					<Show
