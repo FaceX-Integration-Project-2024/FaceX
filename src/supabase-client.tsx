@@ -31,6 +31,18 @@ export async function getUserByEmail(email: string | undefined) {
 	return data;
 }
 
+export async function getAttendanceByEmail(email: string) {
+	const { data, error } = await supabase.rpc("get_attendance_by_email", {
+		user_email: email,
+	});
+	if (error) {
+		throw new Error(
+			`Error fetching data for get_attendance_by_email: ${error.message}`,
+		);
+	}
+	return data;
+}
+
 export async function getAttendanceForClassBlock(class_block_id: number) {
 	const { data, error } = await supabase.rpc("get_attendance_for_class_block", {
 		p_block_id: class_block_id,
