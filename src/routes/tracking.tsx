@@ -66,10 +66,14 @@ function InstructorView() {
 	const email = useUserContext().user()?.email;
 	const [selectedCourseId, setSelectedCourseId] = createSignal(1);
 	const [selectedBlockId, setSelectedBlockId] = createSignal(1);
-	const [courses] = createResource(email, async (email) => {
-		if (!email) return null;
-		return getCoursesByInstructorId(email);
-	});
+	const [courses] = createResource(
+		email,
+		async (email) => {
+			if (!email) return null;
+			return getCoursesByInstructorId(email);
+		},
+		{ initialValue: [] },
+	);
 	const [blocks] = createResource(
 		async () => {
 			return getClassBlocksByCourseId(selectedCourseId());
@@ -126,10 +130,26 @@ function InstructorView() {
 			<Title>FaceX - Tracking</Title>
 			<div class="flex flex-wrap justify-between gap-2">
 				<div class="flex flex-wrap gap-2">
-					<Select<number>
-						value={selectedBlockId()}
-						onChange={setSelectedBlockId}
+					<Select
+						options={courses()}
+						optionValue="course_id"
+						optionTextValue="course_name"
+						placeholder="Select a course"
+						itemComponent={(props) => (
+							<SelectItem item={props.item}>{props.item.textValue}</SelectItem>
+						)}
+					>
+						<SelectTrigger aria-label="Block" class="w-[180px]">
+							<SelectValue<string>>
+								{(state) => state.selectedOption().course_name}
+							</SelectValue>
+						</SelectTrigger>
+						<SelectContent />
+					</Select>
+					<Select
 						options={blocks()}
+						optionValue="block_id"
+						optionTextValue="block_name"
 						placeholder="Select a class block"
 						itemComponent={(props) => (
 							<SelectItem item={props.item}>{props.item.textValue}</SelectItem>
@@ -137,7 +157,7 @@ function InstructorView() {
 					>
 						<SelectTrigger aria-label="Block" class="w-[180px]">
 							<SelectValue<string>>
-								{(state) => state.selectedOption()}
+								{(state) => state.selectedOption().block_name}
 							</SelectValue>
 						</SelectTrigger>
 						<SelectContent />
