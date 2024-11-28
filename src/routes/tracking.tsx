@@ -227,7 +227,6 @@ function StudentView() {
 		async (email) => {
 			if (!email) return null;
 			const data = await getAttendanceByEmail(email);
-			console.log(data);
 			return data;
 		},
 	);
@@ -266,24 +265,26 @@ function StudentView() {
 
 	// Affiche la liste des présences
 	return (
-		<div class="p-1 rounded-lg shadow-md">
-			<h2>Liste des présences</h2>
-			<For each={studentAttendances()}>
-				{(attendance) => (
-					<div class="border bg-transparent decoration-black rounded-lg shadow-md p-2 m-2">
-						<p>
-							<strong>ID :</strong> {attendance.id}
-						</p>
-						<p>
-							<strong>Statut :</strong> {attendance.status}
-						</p>
-						<p>
-							<strong>Date :</strong>{" "}
-							{new Date(attendance.timestamp).toLocaleString()}
-						</p>
-					</div>
-				)}
-			</For>
+		<div class="p-4 rounded-xl shadow-lg">
+			<h2 class="text-xl font-bold text-center mb-4">Liste des présences</h2>
+			<div class="flex flex-wrap gap-4">
+				<For each={studentAttendances()}>
+					{(attendance) => (
+						<div class="flex-1 min-w-[250px] max-w-[300px] border rounded-lg shadow-md p-4 transition-transform transform hover:scale-105">
+							<p>
+								<strong>cours :</strong> {attendance.name}
+							</p>
+							<p>
+								<strong>Statut :</strong> {attendance.status}
+							</p>
+							<p>
+								<strong>Date :</strong>{" "}
+								{new Date(attendance.timestamp).toLocaleString()}
+							</p>
+						</div>
+					)}
+				</For>
+			</div>
 		</div>
 	);
 }
