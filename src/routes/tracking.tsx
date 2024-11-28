@@ -1,4 +1,6 @@
 import { Title } from "@solidjs/meta";
+import { IoPeople, IoSettingsOutline } from "solid-icons/io";
+import { RiSystemTimer2Line } from "solid-icons/ri";
 import {
 	For,
 	Show,
@@ -10,6 +12,7 @@ import {
 import { getSessionEmail, useUserContext } from "~/components/context";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
 import {
 	Card,
 	CardContent,
@@ -32,9 +35,10 @@ import {
 	SelectValue,
 } from "~/components/ui/select";
 import {
-	getAllClassBlocksIds,
 	getAttendanceByEmail,
 	getAttendanceForClassBlock,
+	getClassBlocksByCourseId,
+	getCoursesByInstructorId,
 	getPictureUrl,
 	supabase,
 	updateAttendanceForClassBlock,
@@ -50,7 +54,7 @@ export default function TrackingPage() {
 	const { user } = useUserContext();
 	return (
 		<Show
-			when={["instructor", "admin"].includes(user()?.role || "")} //disabled
+			when={["instructor", "admin"].includes(user()?.role || "")}
 			fallback={<StudentView />}
 		>
 			<InstructorView />
@@ -59,10 +63,16 @@ export default function TrackingPage() {
 }
 
 function InstructorView() {
+	const email = useUserContext().user()?.email;
+	const [selectedCourseId, setSelectedCourseId] = createSignal(1);
 	const [selectedBlockId, setSelectedBlockId] = createSignal(1);
-	const [blockids] = createResource(
+	const [courses] = createResource(email, async (email) => {
+		if (!email) return null;
+		return getCoursesByInstructorId(email);
+	});
+	const [blocks] = createResource(
 		async () => {
-			return getAllClassBlocksIds();
+			return getClassBlocksByCourseId(selectedCourseId());
 		},
 		{ initialValue: [1] },
 	);
@@ -114,20 +124,40 @@ function InstructorView() {
 	return (
 		<div class="flex flex-col p-5">
 			<Title>FaceX - Tracking</Title>
-			<Select<number>
-				value={selectedBlockId()}
-				onChange={setSelectedBlockId}
-				options={blockids()}
-				placeholder="Select a class block"
-				itemComponent={(props) => (
-					<SelectItem item={props.item}>{props.item.textValue}</SelectItem>
-				)}
-			>
-				<SelectTrigger aria-label="Block" class="w-[180px]">
-					<SelectValue<string>>{(state) => state.selectedOption()}</SelectValue>
-				</SelectTrigger>
-				<SelectContent />
-			</Select>
+			<div class="flex flex-wrap justify-between gap-2">
+				<div class="flex flex-wrap gap-2">
+					<Select<number>
+						value={selectedBlockId()}
+						onChange={setSelectedBlockId}
+						options={blocks()}
+						placeholder="Select a class block"
+						itemComponent={(props) => (
+							<SelectItem item={props.item}>{props.item.textValue}</SelectItem>
+						)}
+					>
+						<SelectTrigger aria-label="Block" class="w-[180px]">
+							<SelectValue<string>>
+								{(state) => state.selectedOption()}
+							</SelectValue>
+						</SelectTrigger>
+						<SelectContent />
+					</Select>
+					<Button class="gap-1">
+						<IoSettingsOutline class="h-5 w-5" />
+						Edit course
+					</Button>
+				</div>
+				<div class="flex flex-wrap gap-2">
+					<Button class="gap-1">
+						<RiSystemTimer2Line class="h-5 w-5" />
+						Turn a wheel
+					</Button>
+					<Button class="gap-1">
+						<IoPeople class="h-5 w-5" />
+						Compose groups
+					</Button>
+				</div>
+			</div>
 			<div class="flex justify-center">
 				<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 m-5 gap-5 max-w-screen-2xl">
 					<Show
@@ -162,6 +192,7 @@ function InstructorView() {
 													attendance.attendance_status === "Present"
 														? "Absent"
 														: "Present",
+													"manual",
 												)
 											}
 											class={`${attendance.attendance_status === "Present" ? "bg-green-600 text-white hover:bg-green-800" : ""} cursor-pointer`}

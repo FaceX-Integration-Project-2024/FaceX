@@ -50,11 +50,8 @@ export default function App() {
 						<ColorModeScript storageType={storageManager.type} />
 						<ColorModeProvider storageManager={storageManager}>
 							<Title>FaceX</Title>
-							<Show when={session()}>
+							<Show when={session()} fallback={<LoginNavbar />}>
 								<Navbar />
-							</Show>
-							<Show when={!session()}>
-								<LoginNavbar />
 							</Show>
 							<Suspense>{props.children}</Suspense>
 						</ColorModeProvider>
