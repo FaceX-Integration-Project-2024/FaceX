@@ -40,6 +40,17 @@ import {
 	updateAttendanceForClassBlock,
 } from "~/supabase-client";
 
+import {
+	NumberField,
+	NumberFieldDecrementTrigger,
+	NumberFieldErrorMessage,
+	NumberFieldGroup,
+	NumberFieldIncrementTrigger,
+	NumberFieldInput,
+} from "~/components/ui/number-field";
+
+import { Button } from "~/components/ui/button";
+
 interface Attendance {
 	matricule: string;
 	student_full_name: string;
@@ -259,6 +270,35 @@ function StudentView() {
 		)
 		.subscribe();
 
+	const [openDialog, setOpenDialog] = createSignal(false);
+	const [peoplePerGroup, setPeoplePerGroup] = createSignal(0);
+	const studentNames = [
+		"John Doe",
+		"Jane Smith",
+		"Alice Brown",
+		"Bob White",
+		"Charlie Green",
+		"David Black",
+		"Emily Clark",
+		"Frank Harris",
+		"Grace Lewis",
+		"Henry Walker",
+		"Irene Scott",
+		"Jack Young",
+		"Kathy Adams",
+		"Leo Baker",
+		"Mona Wilson",
+	];
+	const createGroups = (peoplePerGroup: number) => {
+		const groups: string[][] = [];
+		let start = 0;
+		while (start < studentNames.length) {
+			groups.push(studentNames.slice(start, start + peoplePerGroup));
+			start += peoplePerGroup;
+		}
+		return groups;
+	};
+
 	// Clean up subscription when the component is destroyed
 	onCleanup(() => {
 		attendanceChannel.unsubscribe();
@@ -284,6 +324,59 @@ function StudentView() {
 					</div>
 				)}
 			</For>
+			<Button
+				onClick={() => setOpenDialog(true)}
+				class="mt-5"
+				variant="outline"
+			>
+				Groupes
+			</Button>
+
+			<Dialog open={openDialog()} onOpenChange={setOpenDialog}>
+				<DialogContent class="h-[80vh] w-[60vw] max-h-screen max-w-screen flex flex-col gap-4">
+					<DialogHeader>
+						<DialogTitle>Création de groupes</DialogTitle>
+						<DialogDescription>
+							Entrez le nombre de personnes par groupe :
+						</DialogDescription>
+					</DialogHeader>
+
+					<NumberField
+						value={peoplePerGroup()}
+						onRawValueChange={setPeoplePerGroup}
+						validationState={peoplePerGroup() <= 0 ? "invalid" : "valid"}
+						class="w-36"
+					>
+						<NumberFieldGroup>
+							<NumberFieldInput type="number" min={1} step="1" />
+						</NumberFieldGroup>
+						<NumberFieldErrorMessage>
+							Veuillez entrer un nombre valide de personnes par groupe.
+						</NumberFieldErrorMessage>
+					</NumberField>
+
+					<Show when={peoplePerGroup() > 0}>
+						<div class="mt-4 max-w-max overflow-x-hidden">
+							<For each={createGroups(peoplePerGroup())}>
+								{(group, groupIndex) => (
+									<div class="flex space-x-4 mb-4">
+										<div class="flex justify-center items-center w-32 h-16 bg-blue-500 text-white font-bold rounded">
+											Groupe {groupIndex() + 1}
+										</div>
+										<For each={group}>
+											{(student, studentIndex) => (
+												<div class="border flex justify-center items-center w-32 h-16 bg-transparent text-center rounded">
+													{student}
+												</div>
+											)}
+										</For>
+									</div>
+								)}
+							</For>
+						</div>
+					</Show>
+				</DialogContent>
+			</Dialog>
 		</div>
 	);
 }
