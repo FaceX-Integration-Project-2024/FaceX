@@ -1,21 +1,21 @@
 import { createSignal } from "solid-js";
 
 const segments = [
-  { name: "Option 1", color: "red" },
-  { name: "Option 2", color: "yellow" },
-  { name: "Option 3", color: "pink" },
-  { name: "Option 4", color: "yellow" },
-  { name: "Option 5", color: "red" },
-  { name: "Option 6", color: "orange" },
-  { name: "Option 7", color: "green" },
-  { name: "Option 8", color: "blue" },
+	{ name: "Option 1", color: "red" },
+	{ name: "Option 2", color: "yellow" },
+	{ name: "Option 3", color: "pink" },
+	{ name: "Option 4", color: "yellow" },
+	{ name: "Option 5", color: "red" },
+	{ name: "Option 6", color: "orange" },
+	{ name: "Option 7", color: "green" },
+	{ name: "Option 8", color: "blue" },
 ]; // test avant db
 
 export default function RouletteWheel() {
 	const [rotation, setRotation] = createSignal(0);
 
 	const spinWheel = () => {
-		const newRotation = rotation() + Math.ceil(Math.random() * 3600); // pour faire tourner la roulette => pas optimal car parfois la roulette tourne lentement
+		const newRotation = rotation() + Math.ceil(Math.random() * 4 * 3600); // pour faire tourner la roulette => pas optimal car parfois la roulette tourne lentement
 		setRotation(newRotation);
 	};
 
@@ -49,13 +49,13 @@ export default function RouletteWheel() {
 							class="absolute w-full h-full flex items-center "
 							style={{
 								"background-color": segment.color,
-								"transform": `rotate(${(360 / segments.length) * index}deg) skewY(${90 - 360 / segments.length}deg)`,
+								transform: `rotate(${(360 / segments.length) * index}deg) skewY(${90 - 360 / segments.length}deg)`,
 								"transform-origin": "center center",
 							}} // pour les 8 quartiers, le problème c'est qu'ils se superposent entre eux (Option 8 étant au dessus des autres Options)
 						>
 							<div
-								class="w-1/2 h-full flex justify-center items-center "
-								style={{ "transform": "skewY(-45deg)" }}
+								class="w-1/2 h-full flex justify-center items-center"
+								style={{ transform: "skewY(-45deg)" }}
 							>
 								<span class="text-white text-lg font-bold transform -rotate-45 ">
 									{segment.name}
