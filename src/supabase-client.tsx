@@ -63,6 +63,31 @@ export async function getAttendanceByEmail(email: string) {
 	return data;
 }
 
+export async function getAttendanceByStatus(email: string, status: string) {
+	const { data, error } = await supabase.rpc("get_attendance_by_status", {
+		user_email: email,
+		etustatus: status,
+	});
+	if (error) {
+		throw new Error(
+			`Error fetching data for get_attendance_by_status: ${error.message}`,
+		);
+	}
+	return data;
+}
+
+export async function getStudentAttenceStatus(email: string) {
+	const { data, error } = await supabase.rpc("get_student_attendance_status", {
+		etu_email: email,
+	});
+	if (error) {
+		throw new Error(
+			`Error fetching data for get_student_attendance_status: ${error.message}`,
+		);
+	}
+	return data;
+}
+
 export async function getAttendanceForClassBlock(class_block_id: number) {
 	const { data, error } = await supabase.rpc("get_attendance_for_class_block", {
 		p_block_id: class_block_id,
