@@ -61,7 +61,7 @@ export default function TrackingPage() {
 	const { user } = useUserContext();
 	return (
 		<Show
-			when={["instructor", "admin"].includes(user()?.role || "")} //disabled
+			when={["instructor", "admin"].includes(user()?.role || "") || "True"} //disabled
 			fallback={<StudentView />}
 		>
 			<InstructorView />

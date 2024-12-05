@@ -134,7 +134,10 @@ const NumberFieldDecrementTrigger = <T extends ValidComponent = "button">(
 					stroke-linecap="round"
 					stroke-linejoin="round"
 					class="size-4"
+					role="img"
+					aria-labelledby="downArrowTitle"
 				>
+					<title id="downArrowTitle">Down Arrow Icon</title>
 					<path d="M6 9l6 6l6 -6" />
 				</svg>
 			)}
