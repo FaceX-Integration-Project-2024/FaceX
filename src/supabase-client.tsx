@@ -15,8 +15,28 @@ async function fetchData<T>(rpcName: string): Promise<T> {
 	return data;
 }
 
-export async function getAllClassBlocksIds() {
-	return fetchData<Array<number>>("get_all_class_block_ids");
+export async function getCoursesByInstructorId(instructorEmail: string) {
+	const { data, error } = await supabase.rpc("get_courses_by_instructor", {
+		instructor_email: instructorEmail,
+	});
+	if (error) {
+		throw new Error(
+			`Error fetching data for get_courses_by_instructor: ${error.message}`,
+		);
+	}
+	return data;
+}
+
+export async function getClassBlocksByCourseId(courseId: number) {
+	const { data, error } = await supabase.rpc("get_blocks_by_course", {
+		course_id: courseId,
+	});
+	if (error) {
+		throw new Error(
+			`Error fetching data for get_blocks_by_course: ${error.message}`,
+		);
+	}
+	return data;
 }
 
 export async function getUserByEmail(email: string | undefined) {
@@ -59,11 +79,13 @@ export async function updateAttendanceForClassBlock(
 	student_email: string,
 	class_block_id: number,
 	status: string,
+	mode: string,
 ) {
 	const { data, error } = await supabase.rpc("update_attendance", {
 		p_student_email: student_email,
 		p_block_id: class_block_id,
 		p_status: status,
+		p_mode: mode,
 	});
 	if (error) {
 		throw new Error(
