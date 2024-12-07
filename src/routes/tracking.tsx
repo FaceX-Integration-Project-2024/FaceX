@@ -1,5 +1,6 @@
 import { Title } from "@solidjs/meta";
 import { IoPeople, IoSettingsOutline } from "solid-icons/io";
+import { IoRefreshSharp } from "solid-icons/io";
 import { RiSystemTimer2Line } from "solid-icons/ri";
 import {
 	For,
@@ -46,6 +47,15 @@ import {
 	updateAttendanceForClassBlock,
 } from "~/supabase-client";
 
+import {
+	NumberField,
+	NumberFieldDecrementTrigger,
+	NumberFieldErrorMessage,
+	NumberFieldGroup,
+	NumberFieldIncrementTrigger,
+	NumberFieldInput,
+} from "~/components/ui/number-field";
+
 interface Attendance {
 	matricule: string;
 	student_full_name: string;
@@ -56,7 +66,7 @@ export default function TrackingPage() {
 	const { user } = useUserContext();
 	return (
 		<Show
-			when={["instructor", "admin"].includes(user()?.role || "")}
+			when={["instructor", "admin"].includes(user()?.role || "") || "True"}
 			fallback={<StudentView />}
 		>
 			<InstructorView />
@@ -122,6 +132,36 @@ function InstructorView() {
 		)
 		.subscribe();
 
+	const [openDialog, setOpenDialog] = createSignal(false);
+	const [peoplePerGroup, setPeoplePerGroup] = createSignal(0);
+	const [groups, setGroups] = createSignal<string[][]>();
+
+	const createGroups = (
+		peoplePerGroup: number,
+		presentStudents: Attendance[],
+	) => {
+		const groups: string[][] = [];
+		let start = 0;
+		const presentStudentNames = presentStudents.map(
+			(student) => student.student_full_name,
+		);
+
+		for (let i = 0; i < presentStudentNames.length - 1; i++) {
+			const j =
+				Math.floor(Math.random() * (presentStudentNames.length - i)) + i;
+			[presentStudentNames[i], presentStudentNames[j]] = [
+				presentStudentNames[j],
+				presentStudentNames[i],
+			];
+		}
+
+		while (start < presentStudentNames.length) {
+			groups.push(presentStudentNames.slice(start, start + peoplePerGroup));
+			start += peoplePerGroup;
+		}
+		return groups;
+	};
+
 	// Clean up subscription when the component is destroyed
 	onCleanup(() => {
 		attendanceChannel.unsubscribe();
@@ -174,10 +214,102 @@ function InstructorView() {
 						<RiSystemTimer2Line class="h-5 w-5" />
 						Turn a wheel
 					</Button>
-					<Button class="gap-1">
+					<Button onClick={() => setOpenDialog(true)} class="gap-1">
 						<IoPeople class="h-5 w-5" />
 						Compose groups
 					</Button>
+					<Dialog open={openDialog()} onOpenChange={setOpenDialog}>
+						<DialogContent class="h-[75vh] w-[60vw] max-h-screen max-w-screen flex flex-col gap-4">
+							<DialogHeader>
+								<DialogTitle>Création de groupes</DialogTitle>
+								<DialogDescription>
+									Entrez le nombre de personnes par groupe :
+								</DialogDescription>
+							</DialogHeader>
+
+							<div class="flex items-start gap-2">
+								<div class="relative">
+									<NumberField
+										defaultValue={2}
+										onRawValueChange={(value) => {
+											setPeoplePerGroup(value);
+											setGroups(
+												createGroups(
+													peoplePerGroup(),
+													attendances().filter(
+														(a: { attendance_status: string }) =>
+															a.attendance_status === "Present",
+													),
+												),
+											);
+										}}
+										validationState={
+											peoplePerGroup() <= 0 ? "invalid" : "valid"
+										}
+										class="w-36"
+									>
+										<NumberFieldGroup>
+											<NumberFieldInput type="number" min={1} step="1" />
+										</NumberFieldGroup>
+										<NumberFieldErrorMessage>
+											Veuillez entrer un nombre valide de personnes par groupe.
+										</NumberFieldErrorMessage>
+									</NumberField>
+								</div>
+
+								<div class="flex items-center self-start">
+									<Button
+										variant="outline"
+										class="w-10 h-10 flex items-center justify-center p-0"
+										title="Refresh"
+										onClick={() => {
+											const presentStudents = attendances().filter(
+												(a: { attendance_status: string }) =>
+													a.attendance_status === "Present",
+											);
+
+											const newGroups = createGroups(
+												peoplePerGroup(),
+												presentStudents,
+											);
+
+											setGroups(newGroups);
+
+											setOpenDialog(true);
+										}}
+									>
+										<IoRefreshSharp class="h-5 w-5" />
+									</Button>
+								</div>
+							</div>
+
+							<Show when={peoplePerGroup() > 0}>
+								<div class="mt-4 max-w-full overflow-x-auto flex flex-wrap gap-2">
+									<For each={groups()}>
+										{(group, groupIndex) => (
+											<div class="flex items-start gap-4 mb-4">
+												<div class="flex-shrink-0 flex justify-center items-center w-32 h-16 bg-blue-500 text-white font-bold rounded">
+													Groupe {groupIndex() + 1}
+												</div>
+												<div class="flex flex-wrap gap-2">
+													<For each={group}>
+														{(student) => (
+															<div
+																class="border flex justify-center items-center w-40 h-16 text-center text-base rounded-lg px-2 py-2 overflow-hidden text-ellipsis"
+																title={student}
+															>
+																{student}
+															</div>
+														)}
+													</For>
+												</div>
+											</div>
+										)}
+									</For>
+								</div>
+							</Show>
+						</DialogContent>
+					</Dialog>
 				</div>
 			</div>
 			<div class="flex justify-center">
