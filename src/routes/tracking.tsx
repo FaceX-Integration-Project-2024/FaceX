@@ -230,7 +230,13 @@ function InstructorView() {
 						Turn a wheel
 					</Button>
 					<Dialog open={openWheelDialog()} onOpenChange={setOpenWheelDialog}>
-						<DialogContent>
+						<DialogContent class="h-1/2">
+							<DialogHeader>
+								<DialogTitle>Tourner la roue</DialogTitle>
+								<DialogDescription>
+									Cliquez sur la roue pour la faire tourner
+								</DialogDescription>
+							</DialogHeader>
 							<SpinWheel options={options()} />
 						</DialogContent>
 					</Dialog>

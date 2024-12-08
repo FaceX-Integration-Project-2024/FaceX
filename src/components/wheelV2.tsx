@@ -25,7 +25,7 @@ const SpinWheel = (props: SpinWheelProps) => {
 		wheel = new Wheel(container, props.options);
 		wheel.isInteractive = false;
 		wheel.pointerAngle;
-		wheel.overlayImage;
+        wheel.rotationSpeedMax = 1000;
 
 		// Cleanup function to destroy the wheel when the component is unmounted
 		onCleanup(() => {
@@ -36,13 +36,13 @@ const SpinWheel = (props: SpinWheelProps) => {
 
 	const handleClick = () => {
 		if (wheel) {
-			wheel.spin(4000);
+			wheel.spin(400);
 		}
 	};
 
 	return (
 		<div
-			class="wheel-container"
+			class="wheel-container flex"
 			ref={(el) => (container = el)}
 			onClick={handleClick}
 		>
