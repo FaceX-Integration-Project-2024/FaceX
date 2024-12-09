@@ -3,7 +3,7 @@ import { Wheel } from "spin-wheel";
 import type { Attendance } from "~/routes/tracking";
 
 interface SpinWheelProps {
-	options: Attendance[];
+	items: Attendance[];
 }
 
 const SpinWheel = (props: SpinWheelProps) => {
@@ -12,7 +12,7 @@ const SpinWheel = (props: SpinWheelProps) => {
 	let wheel;
 
 	onMount(() => {
-		wheel = new Wheel(container, props.options);
+		wheel = new Wheel(container, props.items);
 		wheel.isInteractive = false;
 		wheel.pointerAngle;
 		wheel.rotationSpeedMax = 1000;
@@ -38,18 +38,20 @@ const SpinWheel = (props: SpinWheelProps) => {
 	};
 
 	return (
-		<div class="h-1/2">
+		<>
 			<div
-				class="wheel-container"
+				class="wheel-container h-96"
 				ref={(el) => (container = el)}
 				onClick={handleClick}
 			>
 				{/* The wheel will be rendered inside this div */}
 			</div>
 			<Show when={winner()}>
-				And the winner is <strong>{winner()}</strong> !
+				<div>
+					And the winner is <strong>{winner()}</strong> !
+				</div>
 			</Show>
-		</div>
+		</>
 	);
 };
 

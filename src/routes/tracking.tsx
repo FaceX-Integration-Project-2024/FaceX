@@ -134,7 +134,7 @@ function InstructorView() {
 		.subscribe();
 
 	const [openWheelDialog, setOpenWheelDialog] = createSignal(false);
-	const [options, setOptions] = createSignal<Attendance[]>();
+	const [items, setItems] = createSignal<Attendance[]>();
 
 	const [openDialog, setOpenDialog] = createSignal(false);
 	const [peoplePerGroup, setPeoplePerGroup] = createSignal(0);
@@ -216,12 +216,12 @@ function InstructorView() {
 				<div class="flex flex-wrap gap-2">
 					<Button
 						onClick={() => {
-							const options = {
+							const items = {
 								items: attendances().map((attendance: Attendance) => ({
 									label: attendance.student_full_name,
 								})),
 							};
-							setOptions(options);
+							setItems(items);
 							setOpenWheelDialog(true);
 						}}
 						class="gap-1"
@@ -237,7 +237,7 @@ function InstructorView() {
 									Cliquez sur la roue pour la faire tourner
 								</DialogDescription>
 							</DialogHeader>
-							<SpinWheel options={options()} />
+							<SpinWheel items={items()} />
 						</DialogContent>
 					</Dialog>
 					<Button onClick={() => setOpenDialog(true)} class="gap-1">
