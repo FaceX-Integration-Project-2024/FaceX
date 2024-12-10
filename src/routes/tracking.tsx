@@ -55,6 +55,7 @@ import {
 	NumberFieldIncrementTrigger,
 	NumberFieldInput,
 } from "~/components/ui/number-field";
+import SpinWheel from "~/components/wheel";
 
 interface Attendance {
 	matricule: string;
@@ -131,6 +132,9 @@ function InstructorView() {
 			(payload) => handleAttendanceChange(payload),
 		)
 		.subscribe();
+
+	const [openWheelDialog, setOpenWheelDialog] = createSignal(false);
+	const [items, setItems] = createSignal<Attendance[]>();
 
 	const [openDialog, setOpenDialog] = createSignal(false);
 	const [peoplePerGroup, setPeoplePerGroup] = createSignal(0);
@@ -210,10 +214,32 @@ function InstructorView() {
 					</Button>
 				</div>
 				<div class="flex flex-wrap gap-2">
-					<Button class="gap-1">
+					<Button
+						onClick={() => {
+							const items = {
+								items: attendances().map((attendance: Attendance) => ({
+									label: attendance.student_full_name,
+								})),
+							};
+							setItems(items);
+							setOpenWheelDialog(true);
+						}}
+						class="gap-1"
+					>
 						<RiSystemTimer2Line class="h-5 w-5" />
 						Turn a wheel
 					</Button>
+					<Dialog open={openWheelDialog()} onOpenChange={setOpenWheelDialog}>
+						<DialogContent>
+							<DialogHeader>
+								<DialogTitle>Tourner la roue</DialogTitle>
+								<DialogDescription>
+									Cliquez sur la roue pour la faire tourner
+								</DialogDescription>
+							</DialogHeader>
+							<SpinWheel items={items()} />
+						</DialogContent>
+					</Dialog>
 					<Button onClick={() => setOpenDialog(true)} class="gap-1">
 						<IoPeople class="h-5 w-5" />
 						Compose groups
