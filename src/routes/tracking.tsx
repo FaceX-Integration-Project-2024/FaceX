@@ -55,7 +55,7 @@ import {
 	NumberFieldIncrementTrigger,
 	NumberFieldInput,
 } from "~/components/ui/number-field";
-import SpinWheel from "~/components/wheelV2";
+import SpinWheel from "~/components/wheel";
 
 interface Attendance {
 	matricule: string;
