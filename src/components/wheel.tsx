@@ -12,9 +12,12 @@ const SpinWheel = (props: SpinWheelProps) => {
 	let wheel;
 
 	onMount(() => {
+		const overlayImageElement = new Image();
+		overlayImageElement.src = "./wheelv2-overlay.svg";
+
 		wheel = new Wheel(container, props.items);
 		wheel.isInteractive = false;
-		wheel.pointerAngle;
+		wheel.overlayImage = overlayImageElement;
 		wheel.rotationSpeedMax = 1000;
 		wheel.onCurrentIndexChange = handleWinnerChange;
 		wheel.itemBackgroundColors = [
@@ -70,7 +73,7 @@ const SpinWheel = (props: SpinWheelProps) => {
 			</div>
 			<Show when={winner()}>
 				<div>
-					And the winner is <strong>{winner()}</strong> !
+					L'étudiant sélectionné est : <strong>{winner()}</strong> !
 				</div>
 			</Show>
 		</>
