@@ -310,24 +310,45 @@ function InstructorView() {
 							</div>
 
 							<Show when={peoplePerGroup() > 0}>
-								<div class="mt-4 max-w-full overflow-x-auto flex flex-wrap gap-2">
+								<div class="mt-4 max-w-full overflow-x-auto flex flex-wrap ">
 									<For each={groups()}>
 										{(group, groupIndex) => (
-											<div class="flex items-start gap-4 mb-4">
-												<div class="flex-shrink-0 flex justify-center items-center w-32 h-16 bg-blue-500 text-white font-bold rounded">
-													Groupe {groupIndex() + 1}
-												</div>
-												<div class="flex flex-wrap gap-2">
-													<For each={group}>
-														{(student) => (
-															<div
-																class="border flex justify-center items-center w-40 h-16 text-center text-base rounded-lg px-2 py-2 overflow-hidden text-ellipsis"
-																title={student}
-															>
-																{student}
-															</div>
-														)}
-													</For>
+											<div class="flex items-start gap-2 mb-4 w-full">
+												<div class="flex items-start gap-2">
+													<div class="flex-shrink-0 flex justify-center items-center w-32 h-36 bg-blue-500 text-white font-bold rounded">
+														Groupe {groupIndex() + 1}
+													</div>
+													<div class="flex flex-wrap gap-2">
+														<For each={group}>
+															{(studentName) => {
+																const student = attendances().find(
+																	(a: { student_full_name: string }) =>
+																		a.student_full_name === studentName,
+																);
+
+																return (
+																	<div class="flex flex-col items-center border rounded-lg w-32 px-2 py-2">
+																		<Avatar class="w-20 h-20 mb-1">
+																			<AvatarImage
+																				src={getPictureUrl(
+																					`students/${student?.matricule}.jpg`,
+																				)}
+																				class="object-cover w-20 h-20"
+																			/>
+																			<AvatarFallback>Photo</AvatarFallback>
+																		</Avatar>
+																		<div class="text-base text-center truncate">
+																			{studentName
+																				.split(" ")
+																				.map((name, index) => (
+																					<div key={index}>{name}</div>
+																				))}
+																		</div>
+																	</div>
+																);
+															}}
+														</For>
+													</div>
 												</div>
 											</div>
 										)}
