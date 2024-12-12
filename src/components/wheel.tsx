@@ -11,13 +11,9 @@ const SpinWheel = (props: SpinWheelProps) => {
 	let container;
 	let wheel;
 
-	onMount(() => {
-		const overlayImageElement = new Image();
-		overlayImageElement.src = "./wheelv2-overlay.svg";
 
 		wheel = new Wheel(container, props.items);
 		wheel.isInteractive = false;
-		wheel.overlayImage = overlayImageElement;
 		wheel.rotationSpeedMax = 1000;
 		wheel.onCurrentIndexChange = handleWinnerChange;
 		wheel.itemBackgroundColors = [
