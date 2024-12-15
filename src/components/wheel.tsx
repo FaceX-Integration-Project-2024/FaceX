@@ -10,6 +10,7 @@ interface SpinWheelProps {
 
 const SpinWheel = (props: SpinWheelProps) => {
 	const [winner, setWinner] = createSignal();
+	const [lastWinner, setLastWinner] = createSignal();
 	const [checkedIncludeAbsents, setCheckedIncludeAbsents] = createSignal(false);
 	const [checkedRemoveStudent, setCheckedRemoveStudent] = createSignal(true);
 	const [items, setItems] = createSignal({
@@ -33,6 +34,7 @@ const SpinWheel = (props: SpinWheelProps) => {
 			wheel.isInteractive = false;
 			// wheel.overlayImage = overlayImageElement;
 			wheel.rotationSpeedMax = 1000;
+			wheel.onRest = handleRest;
 			wheel.onCurrentIndexChange = handleWinnerChange;
 			wheel.itemBackgroundColors = [
 				"#FF0000", // Rouge vif
@@ -74,8 +76,15 @@ const SpinWheel = (props: SpinWheelProps) => {
 
 	const handleClick = () => {
 		if (wheel()) {
+			if (checkedRemoveStudent() && lastWinner()){
+				wheel().items.splice(lastWinner(), 1);
+			}
 			wheel().spinToItem(getRandomInt(wheel().items.length), 4000, true, 5, 1);
 		}
+	};
+
+	const handleRest = () => {
+		setLastWinner(wheel().items.findIndex(obj => obj.label === winner()));
 	};
 
 	return (
@@ -114,7 +123,10 @@ const SpinWheel = (props: SpinWheelProps) => {
 				<Checkbox
 					id="terms1"
 					checked={checkedRemoveStudent()}
-					onChange={setCheckedRemoveStudent}
+					onChange={(value) => {
+						setCheckedRemoveStudent(value);
+
+					}}
 				/>
 				<div class="grid gap-1.5 leading-none">
 					<Label for="terms1-input">Retirer l'étudiant sélectionné</Label>
