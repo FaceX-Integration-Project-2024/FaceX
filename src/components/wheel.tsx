@@ -85,6 +85,8 @@ const SpinWheel = (props: SpinWheelProps) => {
 
 	const handleRest = () => {
 		setLastWinner(wheel().items.findIndex(obj => obj.label === winner()));
+		const announcement = document.getElementById('announcement');
+		announcement.textContent = winner();
 	};
 
 	return (
@@ -125,7 +127,6 @@ const SpinWheel = (props: SpinWheelProps) => {
 					checked={checkedRemoveStudent()}
 					onChange={(value) => {
 						setCheckedRemoveStudent(value);
-
 					}}
 				/>
 				<div class="grid gap-1.5 leading-none">
@@ -137,13 +138,25 @@ const SpinWheel = (props: SpinWheelProps) => {
 				ref={(el) => {
 					container = el;
 				}}
+				tabindex="0"
+				role="button"
+				aria-label="Roue de tirage au sort."
 				onClick={handleClick}
+				onKeyDown={(e) => {
+					if (e.key === "Enter" || e.key === " "){
+						handleClick();
+						e.preventDefault();
+					}
+				}}	
 			>
 				{/* The wheel will be rendered inside this div */}
 			</div>
 			<Show when={winner()}>
 				<div>
 					L'étudiant sélectionné est : <strong>{winner()}</strong> !
+				</div>
+				<div id="announcement" aria-live="assertive" class="absolute -left-[9999px]">
+
 				</div>
 			</Show>
 		</>
