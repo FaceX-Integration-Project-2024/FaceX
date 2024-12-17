@@ -44,6 +44,8 @@ import {
 	SelectValue,
 } from "~/components/ui/select";
 import SpinWheel from "~/components/wheel";
+import { Checkbox } from "~/components/ui/checkbox"
+import { Label } from "~/components/ui/label"
 import {
 	getAttendanceByEmail,
 	getAttendanceByStatus,
@@ -137,11 +139,13 @@ function InstructorView() {
 	const [openDialog, setOpenDialog] = createSignal(false);
 	const [peoplePerGroup, setPeoplePerGroup] = createSignal(0);
 	const [groups, setGroups] = createSignal<string[][]>();
+	const [includeAbsents, setIncludeAbsents] = createSignal(false);
 
 	const createGroups = (
 		peoplePerGroup: number,
 		presentStudents: Attendance[],
 	) => {
+
 		const groups: string[][] = [];
 		let start = 0;
 		const presentStudentNames = presentStudents.map(
@@ -240,59 +244,85 @@ function InstructorView() {
 								</DialogDescription>
 							</DialogHeader>
 
-							<div class="flex items-start gap-2">
-								<div class="relative">
-									<NumberField
-										defaultValue={2}
-										onRawValueChange={(value) => {
-											setPeoplePerGroup(value);
+							<div class="flex flex-col gap-4">
+								<div class="flex items-start gap-2">
+									<div class="relative">
+										<NumberField
+											defaultValue={2}
+											onRawValueChange={(value) => {
+												setPeoplePerGroup(value);
+												setGroups(
+													createGroups(
+														peoplePerGroup(),
+														attendances().filter(
+															(a: { attendance_status: string }) =>
+																a.attendance_status === "Present",
+														),
+													),
+												);
+											}}
+											validationState={
+												peoplePerGroup() <= 0 ? "invalid" : "valid"
+											}
+											class="w-36"
+										>
+											<NumberFieldGroup>
+												<NumberFieldInput type="number" min={1} step="1" />
+											</NumberFieldGroup>
+											<NumberFieldErrorMessage>
+												Veuillez entrer un nombre valide de personnes par groupe.
+											</NumberFieldErrorMessage>
+										</NumberField>
+									</div>
+
+									<div class="flex items-center self-start">
+										<Button
+											variant="outline"
+											class="w-10 h-10 flex items-center justify-center p-0"
+											title="Refresh"
+											onClick={() => {
+												const presentStudents = attendances().filter(
+													(a: { attendance_status: string }) =>
+														a.attendance_status === "Present",
+												);
+
+												const newGroups = createGroups(
+													peoplePerGroup(),
+													presentStudents,
+												);
+
+												setGroups(newGroups);
+
+												setOpenDialog(true);
+											}}
+										>
+											<IoRefreshSharp class="h-5 w-5" />
+										</Button>
+									</div>
+								</div>
+
+								<div class="flex items-start space-x-2">
+									<Checkbox
+										id="include-absents"
+										checked={includeAbsents()}
+										onChange={(value) => {
+											setIncludeAbsents(value);
 											setGroups(
 												createGroups(
 													peoplePerGroup(),
-													attendances().filter(
-														(a: { attendance_status: string }) =>
-															a.attendance_status === "Present",
-													),
+													value === true
+														? attendances()
+														: attendances().filter(
+																(a: { attendance_status: string }) =>
+																	a.attendance_status === "Present",
+														),
 												),
 											);
 										}}
-										validationState={
-											peoplePerGroup() <= 0 ? "invalid" : "valid"
-										}
-										class="w-36"
-									>
-										<NumberFieldGroup>
-											<NumberFieldInput type="number" min={1} step="1" />
-										</NumberFieldGroup>
-										<NumberFieldErrorMessage>
-											Veuillez entrer un nombre valide de personnes par groupe.
-										</NumberFieldErrorMessage>
-									</NumberField>
-								</div>
-
-								<div class="flex items-center self-start">
-									<Button
-										variant="outline"
-										class="w-10 h-10 flex items-center justify-center p-0"
-										title="Refresh"
-										onClick={() => {
-											const presentStudents = attendances().filter(
-												(a: { attendance_status: string }) =>
-													a.attendance_status === "Present",
-											);
-
-											const newGroups = createGroups(
-												peoplePerGroup(),
-												presentStudents,
-											);
-
-											setGroups(newGroups);
-
-											setOpenDialog(true);
-										}}
-									>
-										<IoRefreshSharp class="h-5 w-5" />
-									</Button>
+									/>
+									<div class="grid gap-1.5 leading-none">
+										<Label for="include-absents">Inclure les absents</Label>
+									</div>
 								</div>
 							</div>
 
@@ -302,10 +332,10 @@ function InstructorView() {
 										{(group, groupIndex) => (
 											<div class="flex items-start gap-2 mb-4 w-full">
 												<div class="flex items-start gap-2">
-													<div class="flex-shrink-0 flex justify-center items-center w-32 h-36 bg-blue-500 text-white font-bold rounded">
+													<div class="flex-shrink-0 flex flex-col justify-center items-center w-28 h-20 bg-blue-500 text-white font-bold rounded overflow-hidden">
 														Groupe {groupIndex() + 1}
 													</div>
-													<div class="flex flex-wrap gap-2">
+													<div class="mt-1 flex flex-wrap justify-center gap-2 w-full">
 														<For each={group}>
 															{(studentName) => {
 																const student = attendances().find(
