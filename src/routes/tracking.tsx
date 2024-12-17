@@ -330,42 +330,40 @@ function InstructorView() {
 								<div class="mt-4 max-w-full overflow-x-auto flex flex-wrap ">
 									<For each={groups()}>
 										{(group, groupIndex) => (
-											<div class="flex items-start gap-2 mb-4 w-full">
-												<div class="flex items-start gap-2">
-													<div class="flex-shrink-0 flex flex-col justify-center items-center w-28 h-20 bg-blue-500 text-white font-bold rounded overflow-hidden">
-														Groupe {groupIndex() + 1}
-													</div>
-													<div class="mt-1 flex flex-wrap justify-center gap-2 w-full">
-														<For each={group}>
-															{(studentName) => {
-																const student = attendances().find(
-																	(a: { student_full_name: string }) =>
-																		a.student_full_name === studentName,
-																);
+											<div class="flex items-start gap-4 flex-wrap w-full">
+												<div class="flex-shrink-0 flex flex-col justify-center items-center w-32 h-20 bg-blue-500 text-white font-bold rounded overflow-hidden mt-4">
+													Groupe {groupIndex() + 1}
+												</div>
+												<div class="flex flex-wrap gap-2">
+													<For each={group}>
+														{(studentName) => {
+															const student = attendances().find(
+																(a: { student_full_name: string }) =>
+																	a.student_full_name === studentName,
+															);
 
-																return (
-																	<div class="flex flex-col items-center border rounded-lg w-32 px-2 py-2">
-																		<Avatar class="w-20 h-20 mb-1">
-																			<AvatarImage
-																				src={getPictureUrl(
-																					`students/${student?.matricule}.jpg`,
-																				)}
-																				class="object-cover w-20 h-20"
-																			/>
-																			<AvatarFallback>Photo</AvatarFallback>
-																		</Avatar>
-																		<div class="text-base text-center truncate">
-																			{studentName
-																				.split(" ")
-																				.map((name, index) => (
-																					<div key={index}>{name}</div>
-																				))}
-																		</div>
+															return (
+																<div class="flex flex-col items-center border rounded-lg w-32 px-2 py-2 mt-4">
+																	<Avatar class="w-20 h-20 mb-1">
+																		<AvatarImage
+																			src={getPictureUrl(
+																				`students/${student?.matricule}.jpg`,
+																			)}
+																			class="object-cover w-20 h-20"
+																		/>
+																		<AvatarFallback>Photo</AvatarFallback>
+																	</Avatar>
+																	<div class="text-base text-center truncate">
+																		{studentName
+																			.split(" ")
+																			.map((name, index) => (
+																				<div key={index}>{name}</div>
+																			))}
 																	</div>
-																);
-															}}
-														</For>
-													</div>
+																</div>
+															);
+														}}
+													</For>
 												</div>
 											</div>
 										)}
