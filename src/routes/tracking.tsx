@@ -2,7 +2,6 @@ import { Title } from "@solidjs/meta";
 import { IoPeople, IoSettingsOutline } from "solid-icons/io";
 import { IoRefreshSharp } from "solid-icons/io";
 import { RiSystemTimer2Line } from "solid-icons/ri";
-import { VsLoading } from "solid-icons/vs";
 import {
 	For,
 	Show,
@@ -16,13 +15,7 @@ import { getSessionEmail, useUserContext } from "~/components/context";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardFooter,
-	CardTitle,
-} from "~/components/ui/card";
+import { Card, CardFooter, CardTitle } from "~/components/ui/card";
 import {
 	Dialog,
 	DialogContent,
@@ -102,6 +95,12 @@ function InstructorView() {
 			return getAttendanceForClassBlock(blockId);
 		},
 	);
+
+	const presentAttendances = () => {
+		return attendances().filter(
+			(a: { attendance_status: string }) => a.attendance_status === "Present",
+		);
+	};
 
 	createEffect(() => {
 		const coursesList = courses();
@@ -379,56 +378,43 @@ function InstructorView() {
 					</Dialog>
 				</div>
 			</div>
-			<div class="flex justify-center">
-				<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 m-5 gap-5 max-w-screen-2xl">
-					<Show
-						when={attendances() && Object.keys(attendances()).length !== 0}
-						fallback={"No Data"}
-					>
-						<For each={attendances()}>
-							{(attendance) => (
-								<Card
-									class="flex flex-col justify-center items-center space-y-3 p-2 min-w-fit"
-									tabindex="0"
-									aria-label={attendance.student_full_name}
-									onKeyDown={(e) => {
-										if (e.key === "+" || e.key === "p") {
-											setSelectedStudent(attendance);
-											setOpen(true);
-											e.preventDefault();
+			<div class="flex justify-center m-2">
+				<Show
+					when={attendances() && Object.keys(attendances()).length !== 0}
+					fallback={"No Data"}
+				>
+					<div class="flex flex-col">
+						<div class="flex justify-center items-center">
+							<span class="flex flex-wrap gap-2 text-lg font-semibold">
+								<span>Nombre d'étudiants présents:</span>
+								<span>
+									<span
+										class={
+											presentAttendances().length > 0
+												? "text-green-600"
+												: "text-red-600"
 										}
-										if (e.key === "Enter" || e.key === " ") {
-											updateAttendanceForClassBlock(
-												attendance.student_email,
-												selectedBlockId(),
-												attendance.attendance_status === "Present"
-													? "Absent"
-													: "Present",
-												"manual",
-											);
-											e.preventDefault();
-										}
-									}}
-								>
-									<Avatar
-										class="w-28 h-28 cursor-pointer"
-										onClick={() => {
-											setSelectedStudent(attendance);
-											setOpen(true);
-										}}
 									>
-										<AvatarImage
-											src={getPictureUrl(
-												`students/${attendance.matricule}.jpg`,
-											)}
-											class="object-cover w-28 h-28"
-										/>
-										<AvatarFallback>Photo</AvatarFallback>
-									</Avatar>
-									<CardTitle>{attendance.student_full_name}</CardTitle>
-									<CardFooter>
-										<Badge
-											onClick={() =>
+										{presentAttendances().length}
+									</span>
+									<span class="text-gray-500"> / {attendances().length}</span>
+								</span>
+							</span>
+						</div>
+						<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 m-5 gap-5 max-w-screen-2xl">
+							<For each={attendances()}>
+								{(attendance) => (
+									<Card
+										class="flex flex-col justify-center items-center space-y-3 p-2 min-w-fit"
+										tabindex="0"
+										aria-label={attendance.student_full_name}
+										onKeyDown={(e) => {
+											if (e.key === "+" || e.key === "p") {
+												setSelectedStudent(attendance);
+												setOpen(true);
+												e.preventDefault();
+											}
+											if (e.key === "Enter" || e.key === " ") {
 												updateAttendanceForClassBlock(
 													attendance.student_email,
 													selectedBlockId(),
@@ -436,23 +422,55 @@ function InstructorView() {
 														? "Absent"
 														: "Present",
 													"manual",
-												)
+												);
+												e.preventDefault();
 											}
-											class={`${attendance.attendance_status === "Present" ? "bg-green-600 text-white hover:bg-green-800" : ""} cursor-pointer`}
-											variant={
-												attendance.attendance_status === "Present"
-													? "default"
-													: "destructive"
-											}
+										}}
+									>
+										<Avatar
+											class="w-28 h-28 cursor-pointer"
+											onClick={() => {
+												setSelectedStudent(attendance);
+												setOpen(true);
+											}}
 										>
-											{attendance.attendance_status}
-										</Badge>
-									</CardFooter>
-								</Card>
-							)}
-						</For>
-					</Show>
-				</div>
+											<AvatarImage
+												src={getPictureUrl(
+													`students/${attendance.matricule}.jpg`,
+												)}
+												class="object-cover w-28 h-28"
+											/>
+											<AvatarFallback>Photo</AvatarFallback>
+										</Avatar>
+										<CardTitle>{attendance.student_full_name}</CardTitle>
+										<CardFooter>
+											<Badge
+												onClick={() =>
+													updateAttendanceForClassBlock(
+														attendance.student_email,
+														selectedBlockId(),
+														attendance.attendance_status === "Present"
+															? "Absent"
+															: "Present",
+														"manual",
+													)
+												}
+												class={`${attendance.attendance_status === "Present" ? "bg-green-600 text-white hover:bg-green-800" : ""} cursor-pointer`}
+												variant={
+													attendance.attendance_status === "Present"
+														? "default"
+														: "destructive"
+												}
+											>
+												{attendance.attendance_status}
+											</Badge>
+										</CardFooter>
+									</Card>
+								)}
+							</For>
+						</div>
+					</div>
+				</Show>
 			</div>
 			<Dialog open={open()} onOpenChange={setOpen}>
 				<DialogContent>
