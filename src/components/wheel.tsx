@@ -76,7 +76,11 @@ const SpinWheel = (props: SpinWheelProps) => {
 
 	const handleClick = () => {
 		if (wheel()) {
-			if (checkedRemoveStudent() && lastWinner() !== undefined && wheel().items.length > 1){
+			if (
+				checkedRemoveStudent() &&
+				lastWinner() !== undefined &&
+				wheel().items.length > 1
+			) {
 				wheel().items.splice(lastWinner(), 1);
 			}
 			wheel().spinToItem(getRandomInt(wheel().items.length), 4000, true, 5, 1);
@@ -84,8 +88,8 @@ const SpinWheel = (props: SpinWheelProps) => {
 	};
 
 	const handleRest = () => {
-		setLastWinner(wheel().items.findIndex(obj => obj.label === winner()));
-		const announcement = document.getElementById('announcement');
+		setLastWinner(wheel().items.findIndex((obj) => obj.label === winner()));
+		const announcement = document.getElementById("announcement");
 		announcement.textContent = winner();
 	};
 
@@ -143,11 +147,11 @@ const SpinWheel = (props: SpinWheelProps) => {
 				aria-label="Roue de tirage au sort."
 				onClick={handleClick}
 				onKeyDown={(e) => {
-					if (e.key === "Enter" || e.key === " "){
+					if (e.key === "Enter" || e.key === " ") {
 						handleClick();
 						e.preventDefault();
 					}
-				}}	
+				}}
 			>
 				{/* The wheel will be rendered inside this div */}
 			</div>
@@ -155,9 +159,11 @@ const SpinWheel = (props: SpinWheelProps) => {
 				<div>
 					L'étudiant sélectionné est : <strong>{winner()}</strong> !
 				</div>
-				<div id="announcement" aria-live="assertive" class="absolute -left-[9999px]">
-
-				</div>
+				<div
+					id="announcement"
+					aria-live="assertive"
+					class="absolute -left-[9999px]"
+				></div>
 			</Show>
 		</>
 	);

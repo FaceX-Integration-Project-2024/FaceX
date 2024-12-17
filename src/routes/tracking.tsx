@@ -233,7 +233,7 @@ function InstructorView() {
 									>
 										<IoRefreshSharp class="h-5 w-5" />
 									</Button>
-									</DialogTitle>
+								</DialogTitle>
 								<DialogDescription>
 									Cliquez sur la roue pour la faire tourner
 								</DialogDescription>
