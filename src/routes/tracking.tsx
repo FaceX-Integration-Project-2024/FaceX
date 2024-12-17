@@ -2,9 +2,11 @@ import { Title } from "@solidjs/meta";
 import { IoPeople, IoSettingsOutline } from "solid-icons/io";
 import { IoRefreshSharp } from "solid-icons/io";
 import { RiSystemTimer2Line } from "solid-icons/ri";
+import { VsLoading } from "solid-icons/vs";
 import {
 	For,
 	Show,
+	createEffect,
 	createResource,
 	createSignal,
 	onCleanup,
@@ -75,9 +77,9 @@ export default function TrackingPage() {
 }
 
 function InstructorView() {
-	const email = useUserContext().user()?.email;
-	const [selectedCourseId, setSelectedCourseId] = createSignal(1);
-	const [selectedBlockId, setSelectedBlockId] = createSignal(1);
+	const email = getSessionEmail;
+	const [selectedCourseId, setSelectedCourseId] = createSignal<number>();
+	const [selectedBlockId, setSelectedBlockId] = createSignal<number>();
 	const [courses] = createResource(
 		email,
 		async (email) => {
@@ -87,10 +89,11 @@ function InstructorView() {
 		{ initialValue: [] },
 	);
 	const [blocks] = createResource(
-		async () => {
-			return getClassBlocksByCourseId(selectedCourseId());
+		selectedCourseId,
+		async (selectedCourseId) => {
+			return getClassBlocksByCourseId(selectedCourseId);
 		},
-		{ initialValue: [1] },
+		{ initialValue: [] },
 	);
 	const [attendances, { refetch }] = createResource(
 		selectedBlockId,
@@ -99,6 +102,20 @@ function InstructorView() {
 			return getAttendanceForClassBlock(blockId);
 		},
 	);
+
+	createEffect(() => {
+		const coursesList = courses();
+		if (coursesList.length > 0 && !selectedCourseId()) {
+			setSelectedCourseId(coursesList[0].course_id); // Premier cours par défaut
+		}
+	});
+	createEffect(() => {
+		const blocksList = blocks();
+		if (blocksList.length > 0 && !selectedBlockId()) {
+			setSelectedBlockId(blocksList[0].block_id); // Premier block par défaut
+		}
+	});
+
 	const [open, setOpen] = createSignal(false);
 	const [selectedStudent, setSelectedStudent] = createSignal<Attendance | null>(
 		null,
@@ -176,6 +193,13 @@ function InstructorView() {
 				<div class="flex flex-wrap gap-2">
 					<Select
 						options={courses()}
+						value={courses().find(
+							(course) => course.course_id === selectedCourseId(),
+						)}
+						onChange={(course) => {
+							setSelectedCourseId(course.course_id);
+							setSelectedBlockId(undefined);
+						}}
 						optionValue="course_id"
 						optionTextValue="course_name"
 						placeholder="Select a course"
@@ -185,13 +209,22 @@ function InstructorView() {
 					>
 						<SelectTrigger aria-label="Course" class="w-[180px]">
 							<SelectValue<string>>
-								{(state) => state.selectedOption().course_name}
+								{(state) => state.selectedOption()?.course_name}
 							</SelectValue>
 						</SelectTrigger>
 						<SelectContent />
 					</Select>
 					<Select
 						options={blocks()}
+						value={blocks().find(
+							(block) => block.block_id === selectedBlockId(),
+						)}
+						onChange={(block) => {
+							if (block) {
+								// Add a null check before accessing block properties
+								setSelectedBlockId(block.block_id);
+							}
+						}}
 						optionValue="block_id"
 						optionTextValue="block_name"
 						placeholder="Select a class block"
@@ -201,7 +234,7 @@ function InstructorView() {
 					>
 						<SelectTrigger aria-label="Block" class="w-[180px]">
 							<SelectValue<string>>
-								{(state) => state.selectedOption().block_name}
+								{(state) => state.selectedOption()?.block_name}
 							</SelectValue>
 						</SelectTrigger>
 						<SelectContent />
@@ -357,6 +390,7 @@ function InstructorView() {
 								<Card
 									class="flex flex-col justify-center items-center space-y-3 p-2 min-w-fit"
 									tabindex="0"
+									aria-label={attendance.student_full_name}
 									onKeyDown={(e) => {
 										if (e.key === "+" || e.key === "p") {
 											setSelectedStudent(attendance);
