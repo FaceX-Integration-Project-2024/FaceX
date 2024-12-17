@@ -76,7 +76,7 @@ const SpinWheel = (props: SpinWheelProps) => {
 
 	const handleClick = () => {
 		if (wheel()) {
-			if (checkedRemoveStudent() && lastWinner() !== undefined){
+			if (checkedRemoveStudent() && lastWinner() !== undefined && wheel().items.length > 1){
 				wheel().items.splice(lastWinner(), 1);
 			}
 			wheel().spinToItem(getRandomInt(wheel().items.length), 4000, true, 5, 1);

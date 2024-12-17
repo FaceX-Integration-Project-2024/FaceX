@@ -133,6 +133,7 @@ function InstructorView() {
 		.subscribe();
 
 	const [openWheelDialog, setOpenWheelDialog] = createSignal(false);
+	const [showWheel, setShowWheel] = createSignal(true);
 
 	const [openDialog, setOpenDialog] = createSignal(false);
 	const [peoplePerGroup, setPeoplePerGroup] = createSignal(0);
@@ -219,12 +220,27 @@ function InstructorView() {
 					<Dialog open={openWheelDialog()} onOpenChange={setOpenWheelDialog}>
 						<DialogContent>
 							<DialogHeader>
-								<DialogTitle>Tourner la roue</DialogTitle>
+								<DialogTitle class="flex flex-row gap-2 items-center">
+									Tourner la roue
+									<Button
+										variant="ghost"
+										class="flex h-5 w-5 p-3"
+										title="Refresh"
+										onClick={() => {
+											setShowWheel(false);
+											setShowWheel(true);
+										}}
+									>
+										<IoRefreshSharp class="h-5 w-5" />
+									</Button>
+									</DialogTitle>
 								<DialogDescription>
 									Cliquez sur la roue pour la faire tourner
 								</DialogDescription>
 							</DialogHeader>
-							<SpinWheel attendances={attendances()} />
+							<Show when={showWheel()} keyed>
+								<SpinWheel attendances={attendances()} />
+							</Show>
 						</DialogContent>
 					</Dialog>
 					<Button onClick={() => setOpenDialog(true)} class="gap-1">
