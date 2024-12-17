@@ -183,7 +183,7 @@ function InstructorView() {
 							<SelectItem item={props.item}>{props.item.textValue}</SelectItem>
 						)}
 					>
-						<SelectTrigger aria-label="Block" class="w-[180px]">
+						<SelectTrigger aria-label="Course" class="w-[180px]">
 							<SelectValue<string>>
 								{(state) => state.selectedOption().course_name}
 							</SelectValue>
@@ -354,7 +354,28 @@ function InstructorView() {
 					>
 						<For each={attendances()}>
 							{(attendance) => (
-								<Card class="flex flex-col justify-center items-center space-y-3 p-2 min-w-fit">
+								<Card
+									class="flex flex-col justify-center items-center space-y-3 p-2 min-w-fit"
+									tabindex="0"
+									onKeyDown={(e) => {
+										if (e.key === "+" || e.key === "p") {
+											setSelectedStudent(attendance);
+											setOpen(true);
+											e.preventDefault();
+										}
+										if (e.key === "Enter" || e.key === " ") {
+											updateAttendanceForClassBlock(
+												attendance.student_email,
+												selectedBlockId(),
+												attendance.attendance_status === "Present"
+													? "Absent"
+													: "Present",
+												"manual",
+											);
+											e.preventDefault();
+										}
+									}}
+								>
 									<Avatar
 										class="w-28 h-28 cursor-pointer"
 										onClick={() => {
@@ -418,7 +439,6 @@ function InstructorView() {
 								</DialogTitle>
 								<DialogDescription class="flex flex-col">
 									<span>Matricule : {selectedStudent()?.matricule}</span>
-									<span>Classe : 3TL1</span>
 									<span>Statut : {selectedStudent()?.attendance_status}</span>
 								</DialogDescription>
 							</DialogHeader>

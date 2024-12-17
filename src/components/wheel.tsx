@@ -76,7 +76,7 @@ const SpinWheel = (props: SpinWheelProps) => {
 
 	const handleClick = () => {
 		if (wheel()) {
-			if (checkedRemoveStudent() && lastWinner() !== undefined){
+			if (checkedRemoveStudent() && lastWinner() !== undefined) {
 				wheel().items.splice(lastWinner(), 1);
 			}
 			wheel().spinToItem(getRandomInt(wheel().items.length), 4000, true, 5, 1);
@@ -84,7 +84,7 @@ const SpinWheel = (props: SpinWheelProps) => {
 	};
 
 	const handleRest = () => {
-		setLastWinner(wheel().items.findIndex(obj => obj.label === winner()));
+		setLastWinner(wheel().items.findIndex((obj) => obj.label === winner()));
 	};
 
 	return (
@@ -125,7 +125,6 @@ const SpinWheel = (props: SpinWheelProps) => {
 					checked={checkedRemoveStudent()}
 					onChange={(value) => {
 						setCheckedRemoveStudent(value);
-
 					}}
 				/>
 				<div class="grid gap-1.5 leading-none">
