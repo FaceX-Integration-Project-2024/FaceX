@@ -1,4 +1,5 @@
 import { Title } from "@solidjs/meta";
+import { saveAs } from "file-saver";
 import { IoPeople, IoSettingsOutline } from "solid-icons/io";
 import { IoRefreshSharp } from "solid-icons/io";
 import { RiSystemTimer2Line } from "solid-icons/ri";
@@ -10,6 +11,7 @@ import {
 	onCleanup,
 	onMount,
 } from "solid-js";
+import * as XLSX from "xlsx";
 import { getSessionEmail, useUserContext } from "~/components/context";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Badge } from "~/components/ui/badge";
@@ -21,6 +23,7 @@ import {
 	CardFooter,
 	CardTitle,
 } from "~/components/ui/card";
+import { Checkbox } from "~/components/ui/checkbox";
 import {
 	Dialog,
 	DialogContent,
@@ -28,6 +31,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "~/components/ui/dialog";
+import { Label } from "~/components/ui/label";
 import {
 	NumberField,
 	NumberFieldDecrementTrigger,
@@ -44,8 +48,6 @@ import {
 	SelectValue,
 } from "~/components/ui/select";
 import SpinWheel from "~/components/wheel";
-import { Checkbox } from "~/components/ui/checkbox"
-import { Label } from "~/components/ui/label"
 import {
 	getAttendanceByEmail,
 	getAttendanceByStatus,
@@ -145,7 +147,6 @@ function InstructorView() {
 		peoplePerGroup: number,
 		presentStudents: Attendance[],
 	) => {
-
 		const groups: string[][] = [];
 		let start = 0;
 		const presentStudentNames = presentStudents.map(
@@ -166,6 +167,48 @@ function InstructorView() {
 			start += peoplePerGroup;
 		}
 		return groups;
+	};
+
+	const exportGroupsToExcel = () => {
+		const fileName = prompt(
+			"Entrez le nom du fichier (sans extension) :",
+			"groupes",
+		);
+
+		if (fileName) {
+			const workbook = XLSX.utils.book_new();
+			const groupList = groups();
+
+			if (groupList.length === 0) {
+				console.error("Il n'y a pas de groupes disponibles !");
+				return;
+			}
+
+			const worksheetData = [];
+			const header = [
+				"Groupe",
+				...groupList[0].map((_, i) => `Étudiant ${i + 1}`),
+			];
+			worksheetData.push(header);
+
+			groupList.forEach((group, index) => {
+				const row = [index + 1, ...group];
+				worksheetData.push(row);
+			});
+
+			const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+			XLSX.utils.book_append_sheet(workbook, worksheet, "Groupe");
+
+			const excelBuffer = XLSX.write(workbook, {
+				bookType: "xlsx",
+				type: "array",
+			});
+			const data = new Blob([excelBuffer], {
+				type: "application/octet-stream",
+			});
+
+			saveAs(data, `${fileName}.xlsx`);
+		}
 	};
 
 	// Clean up subscription when the component is destroyed
@@ -270,7 +313,8 @@ function InstructorView() {
 												<NumberFieldInput type="number" min={1} step="1" />
 											</NumberFieldGroup>
 											<NumberFieldErrorMessage>
-												Veuillez entrer un nombre valide de personnes par groupe.
+												Veuillez entrer un nombre valide de personnes par
+												groupe.
 											</NumberFieldErrorMessage>
 										</NumberField>
 									</div>
@@ -315,7 +359,7 @@ function InstructorView() {
 														: attendances().filter(
 																(a: { attendance_status: string }) =>
 																	a.attendance_status === "Present",
-														),
+															),
 												),
 											);
 										}}
@@ -369,6 +413,13 @@ function InstructorView() {
 										)}
 									</For>
 								</div>
+								<Button
+									variant="outline"
+									onClick={exportGroupsToExcel}
+									class="bg-black text-white font-bold rounded-lg hover:bg-gray-900"
+								>
+									Exporter les groupes
+								</Button>
 							</Show>
 						</DialogContent>
 					</Dialog>
