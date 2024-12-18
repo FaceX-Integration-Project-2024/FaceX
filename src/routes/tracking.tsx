@@ -71,7 +71,7 @@ export default function TrackingPage() {
 	const { user } = useUserContext();
 	return (
 		<Show
-			when={["instructor", "admin"].includes(user()?.role || "") || "True"}
+			when={["instructor", "admin"].includes(user()?.role || "")}
 			fallback={<StudentView />}
 		>
 			<InstructorView />
@@ -138,6 +138,7 @@ function InstructorView() {
 		.subscribe();
 
 	const [openWheelDialog, setOpenWheelDialog] = createSignal(false);
+	const [showWheel, setShowWheel] = createSignal(true);
 
 	const [openDialog, setOpenDialog] = createSignal(false);
 	const [peoplePerGroup, setPeoplePerGroup] = createSignal(0);
@@ -267,12 +268,27 @@ function InstructorView() {
 					<Dialog open={openWheelDialog()} onOpenChange={setOpenWheelDialog}>
 						<DialogContent>
 							<DialogHeader>
-								<DialogTitle>Tourner la roue</DialogTitle>
+								<DialogTitle class="flex flex-row gap-2 items-center">
+									Tourner la roue
+									<Button
+										variant="ghost"
+										class="flex h-5 w-5 p-3"
+										title="Refresh"
+										onClick={() => {
+											setShowWheel(false);
+											setShowWheel(true);
+										}}
+									>
+										<IoRefreshSharp class="h-5 w-5" />
+									</Button>
+								</DialogTitle>
 								<DialogDescription>
 									Cliquez sur la roue pour la faire tourner
 								</DialogDescription>
 							</DialogHeader>
-							<SpinWheel attendances={attendances()} />
+							<Show when={showWheel()} keyed>
+								<SpinWheel attendances={attendances()} />
+							</Show>
 						</DialogContent>
 					</Dialog>
 					<Button onClick={() => setOpenDialog(true)} class="gap-1">
@@ -587,8 +603,13 @@ function StudentView() {
 	// Affiche la liste des présences
 	return (
 		<div>
-			<div class="mb-6 p-4 max-w-md mx-auto border rounded-lg shadow-md ">
-				<ul class="space-y-4 ">
+			{/* Carte des statistiques */}
+			<div
+				class="mb-6 p-4 max-w-md mx-auto border rounded-lg shadow-md"
+				aria-label="Statistiques des présences de l'étudiant"
+			>
+				<ul class="space-y-4">
+					{/* Présences */}
 					<li class="flex items-center justify-between">
 						<span>Nombre de présences :</span>
 						{getStudentAttendancesStatus()?.present}
@@ -598,11 +619,13 @@ function StudentView() {
 								setSelectedstats("Present");
 							}}
 							type="button"
+							aria-label="Voir les détails des présences"
 							class="px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-lg shadow hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
 						>
 							Détails
 						</button>
 					</li>
+					{/* Absences */}
 					<li class="flex items-center justify-between">
 						<span>Nombre d'absences :</span>
 						{getStudentAttendancesStatus()?.absent}
@@ -612,11 +635,13 @@ function StudentView() {
 								setSelectedstats("Absent");
 							}}
 							type="button"
+							aria-label="Voir les détails des absences"
 							class="px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-lg shadow hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
 						>
 							Détails
 						</button>
 					</li>
+					{/* Retards */}
 					<li class="flex items-center justify-between">
 						<span>Nombre de retards :</span>
 						{getStudentAttendancesStatus()?.retard}
@@ -626,6 +651,7 @@ function StudentView() {
 								setSelectedstats("Retard");
 							}}
 							type="button"
+							aria-label="Voir les détails des retards"
 							class="px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-lg shadow hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
 						>
 							Détails
@@ -634,14 +660,19 @@ function StudentView() {
 				</ul>
 			</div>
 
-			<div class="p-4 rounded-xl shadow-lg">
+			{/* Section des présences individuelles */}
+			<div class="p-4 rounded-xl shadow-lg" aria-label="Liste des présences">
 				<h2 class="text-xl font-bold text-center mb-4">Mes présences</h2>
-				<div class="flex flex-wrap gap-4">
+				<div class="flex flex-wrap gap-4" aria-live="polite">
 					<For each={studentAttendances()}>
 						{(attendance) => (
-							<div class="flex-1 min-w-[250px] max-w-[300px] border rounded-lg shadow-md p-4 transition-transform transform hover:scale-105">
+							<div
+								class="flex-1 min-w-[250px] max-w-[300px] border rounded-lg shadow-md p-4 transition-transform transform hover:scale-105"
+								tabindex="0"
+								aria-label={`Présence pour le cours ${attendance.name}. Statut : ${attendance.status}. Date : ${new Date(attendance.timestamp).toLocaleString()}`}
+							>
 								<p>
-									<strong>cours :</strong> {attendance.name}
+									<strong>Cours :</strong> {attendance.name}
 								</p>
 								<p>
 									<strong>Statut :</strong> {attendance.status}
@@ -655,15 +686,25 @@ function StudentView() {
 					</For>
 				</div>
 			</div>
-			<Dialog open={open()} onOpenChange={setOpen}>
+
+			{/* Dialog des détails par statut */}
+			<Dialog
+				open={open()}
+				onOpenChange={setOpen}
+				aria-label={`Détails des ${selectedstats}`}
+			>
 				<DialogContent>
 					<div class="p-4 rounded-xl shadow-lg">
-						<div class="flex flex-wrap gap-4">
+						<div class="flex flex-wrap gap-4" aria-live="polite">
 							<For each={studentAttendencesByStatus()}>
 								{(attendance) => (
-									<div class="flex-1 min-w-[250px] max-w-[300px] border rounded-lg shadow-md p-4 transition-transform transform hover:scale-105">
+									<div
+										class="flex-1 min-w-[250px] max-w-[300px] border rounded-lg shadow-md p-4 transition-transform transform hover:scale-105"
+										tabindex="0"
+										aria-label={`Cours ${attendance.name}, Statut ${attendance.status}, Date ${new Date(attendance.timestamp).toLocaleString()}`}
+									>
 										<p>
-											<strong>cours :</strong> {attendance.name}
+											<strong>Cours :</strong> {attendance.name}
 										</p>
 										<p>
 											<strong>Statut :</strong> {attendance.status}
