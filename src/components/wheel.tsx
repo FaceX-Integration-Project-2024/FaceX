@@ -16,7 +16,7 @@ const SpinWheel = (props: SpinWheelProps) => {
 	const [items, setItems] = createSignal({
 		items: props.attendances
 			.filter(
-				(a: { attendance_status: string }) => a.attendance_status === "Present",
+				(a: { attendance_status: string }) => a.attendance_status === "Present" || a.attendance_status === "Late",
 			)
 			.map((attendance: Attendance) => ({
 				label: attendance.student_full_name,
@@ -112,7 +112,7 @@ const SpinWheel = (props: SpinWheelProps) => {
 										items: props.attendances
 											.filter(
 												(a: { attendance_status: string }) =>
-													a.attendance_status === "Present",
+													a.attendance_status === "Present" || a.attendance_status === "Late",
 											)
 											.map((attendance: Attendance) => ({
 												label: attendance.student_full_name,
@@ -149,7 +149,6 @@ const SpinWheel = (props: SpinWheelProps) => {
 				onKeyDown={(e) => {
 					if (e.key === "Enter" || e.key === " ") {
 						handleClick();
-						e.preventDefault();
 					}
 				}}
 			>
