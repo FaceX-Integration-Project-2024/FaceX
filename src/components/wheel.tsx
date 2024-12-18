@@ -16,7 +16,7 @@ const SpinWheel = (props: SpinWheelProps) => {
 	const [items, setItems] = createSignal({
 		items: props.attendances
 			.filter(
-				(a: { attendance_status: string }) => a.attendance_status === "Present",
+				(a: { attendance_status: string }) => a.attendance_status === "Present" || a.attendance_status === "Late",
 			)
 			.map((attendance: Attendance) => ({
 				label: attendance.student_full_name,
@@ -76,7 +76,11 @@ const SpinWheel = (props: SpinWheelProps) => {
 
 	const handleClick = () => {
 		if (wheel()) {
-			if (checkedRemoveStudent() && lastWinner() !== undefined) {
+			if (
+				checkedRemoveStudent() &&
+				lastWinner() !== undefined &&
+				wheel().items.length > 1
+			) {
 				wheel().items.splice(lastWinner(), 1);
 			}
 			wheel().spinToItem(getRandomInt(wheel().items.length), 4000, true, 5, 1);
@@ -85,6 +89,8 @@ const SpinWheel = (props: SpinWheelProps) => {
 
 	const handleRest = () => {
 		setLastWinner(wheel().items.findIndex((obj) => obj.label === winner()));
+		const announcement = document.getElementById("announcement");
+		announcement.textContent = winner();
 	};
 
 	return (
@@ -106,7 +112,7 @@ const SpinWheel = (props: SpinWheelProps) => {
 										items: props.attendances
 											.filter(
 												(a: { attendance_status: string }) =>
-													a.attendance_status === "Present",
+													a.attendance_status === "Present" || a.attendance_status === "Late",
 											)
 											.map((attendance: Attendance) => ({
 												label: attendance.student_full_name,
@@ -136,7 +142,15 @@ const SpinWheel = (props: SpinWheelProps) => {
 				ref={(el) => {
 					container = el;
 				}}
+				tabindex="0"
+				role="button"
+				aria-label="Roue de tirage au sort."
 				onClick={handleClick}
+				onKeyDown={(e) => {
+					if (e.key === "Enter" || e.key === " ") {
+						handleClick();
+					}
+				}}
 			>
 				{/* The wheel will be rendered inside this div */}
 			</div>
@@ -144,6 +158,11 @@ const SpinWheel = (props: SpinWheelProps) => {
 				<div>
 					L'étudiant sélectionné est : <strong>{winner()}</strong> !
 				</div>
+				<div
+					id="announcement"
+					aria-live="assertive"
+					class="absolute -left-[9999px]"
+				></div>
 			</Show>
 		</>
 	);
