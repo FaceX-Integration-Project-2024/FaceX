@@ -2,6 +2,7 @@ import { Title } from "@solidjs/meta";
 import { IoPeople, IoSettingsOutline } from "solid-icons/io";
 import { IoRefreshSharp } from "solid-icons/io";
 import { RiSystemTimer2Line } from "solid-icons/ri";
+import { Separator } from "~/components/ui/separator";
 import {
 	For,
 	Show,
@@ -110,7 +111,7 @@ function InstructorView() {
 
 	const presentAttendances = () => {
 		return attendances().filter(
-			(a: { attendance_status: string }) => a.attendance_status === "Present",
+			(a: { attendance_status: string }) => a.attendance_status === "Present" || a.attendance_status === "Late",
 		);
 	};
 
@@ -209,9 +210,11 @@ function InstructorView() {
 							(course) => course.course_id === selectedCourseId(),
 						)}
 						onChange={(course) => {
-							setSelectedCourseId(course.course_id);
-							setLateTimeInterval(course.late_time_interval);
-							setSelectedBlockId(undefined);
+							if(course) {
+								setSelectedCourseId(course.course_id);
+								setLateTimeInterval(course.late_time_interval);
+								setSelectedBlockId(undefined);
+							}
 						}}
 						optionValue="course_id"
 						optionTextValue="course_name"
@@ -521,7 +524,7 @@ function InstructorView() {
 												updateAttendanceForClassBlock(
 													attendance.student_email,
 													selectedBlockId(),
-													attendance.attendance_status === "Present"
+													attendance.attendance_status === "Present" || attendance.attendance_status === "Late"
 														? "Absent"
 														: "Present",
 													"manual",
@@ -552,20 +555,20 @@ function InstructorView() {
 													updateAttendanceForClassBlock(
 														attendance.student_email,
 														selectedBlockId(),
-														attendance.attendance_status === "Present"
+														attendance.attendance_status === "Present" || attendance.attendance_status === "Late"
 															? "Absent"
 															: "Present",
 														"manual",
 													)
 												}
-												class={`${attendance.attendance_status === "Present" ? "bg-green-600 text-white hover:bg-green-800" : ""} cursor-pointer`}
+												class={`${attendance.attendance_status === "Present" ? "bg-green-600 text-white hover:bg-green-800" : attendance.attendance_status === "Late" ? "bg-green-600 text-white hover:bg-green-800 border-4 border-yellow-400" : ""} {} cursor-pointer`}
 												variant={
-													attendance.attendance_status === "Present"
+													attendance.attendance_status === "Present" || attendance.attendance_status === "Late"
 														? "default"
 														: "destructive"
 												}
 											>
-												{attendance.attendance_status}
+												{attendance.attendance_status === "Late" ? "Present" : attendance.attendance_status}
 											</Badge>
 										</CardFooter>
 									</Card>
@@ -595,6 +598,10 @@ function InstructorView() {
 								<DialogDescription class="flex flex-col">
 									<span>Matricule : {selectedStudent()?.matricule}</span>
 									<span>Statut : {selectedStudent()?.attendance_status}</span>
+									<Separator class="my-2"/>
+									<span>Total présences : {}</span>
+									<span>Total retards : {}</span>
+									<span>Total absences : {}</span>
 								</DialogDescription>
 							</DialogHeader>
 						</div>
