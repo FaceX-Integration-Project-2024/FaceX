@@ -12,13 +12,13 @@ import {
 	onCleanup,
 } from "solid-js";
 import * as XLSX from "xlsx";
-import { getSessionEmail } from "~/components/context";
-import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
-import { Badge } from "~/components/ui/badge";
-import { Button } from "~/components/ui/button";
-import { Card, CardFooter, CardTitle } from "~/components/ui/card";
-import { Checkbox } from "~/components/ui/checkbox";
-import { Separator } from "~/components/ui/separator";
+import { getSessionEmail } from "../components/context";
+import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
+import { Badge } from "../components/ui/badge";
+import { Button } from "../components/ui/button";
+import { Card, CardFooter, CardTitle } from "../components/ui/card";
+import { Checkbox } from "../components/ui/checkbox";
+import { Separator } from "../components/ui/separator";
 
 import {
 	Dialog,
@@ -27,8 +27,8 @@ import {
 	DialogFooter,
 	DialogHeader,
 	DialogTitle,
-} from "~/components/ui/dialog";
-import { Label } from "~/components/ui/label";
+} from "../components/ui/dialog";
+import { Label } from "../components/ui/label";
 import {
 	NumberField,
 	NumberFieldDecrementTrigger,
@@ -37,21 +37,21 @@ import {
 	NumberFieldIncrementTrigger,
 	NumberFieldInput,
 	NumberFieldLabel,
-} from "~/components/ui/number-field";
+} from "../components/ui/number-field";
 import {
 	Select,
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-} from "~/components/ui/select";
+} from "../components/ui/select";
 import {
 	TextField,
 	TextFieldInput,
 	TextFieldLabel,
-} from "~/components/ui/text-field";
-import SpinWheel from "~/components/wheel";
-import type { Attendance } from "~/routes/tracking";
+} from "../components/ui/text-field";
+import SpinWheel from "../components/wheel";
+import type { Attendance } from "../routes/tracking";
 import {
 	getAttendanceForClassBlock,
 	getClassBlocksByCourseId,
@@ -60,7 +60,7 @@ import {
 	supabase,
 	updateAttendanceForClassBlock,
 	updateLateTimeInterval,
-} from "~/supabase-client";
+} from "../supabase-client";
 
 export default function InstructorView() {
 	const email = getSessionEmail;
@@ -427,6 +427,7 @@ export default function InstructorView() {
 									<div class="relative">
 										<NumberField
 											defaultValue={2}
+											minValue={1}
 											onRawValueChange={(value) => {
 												setPeoplePerGroup(value);
 												setGroups(
@@ -448,7 +449,9 @@ export default function InstructorView() {
 											class="w-36"
 										>
 											<NumberFieldGroup>
-												<NumberFieldInput type="number" min={1} step="1" />
+												<NumberFieldInput/>
+												<NumberFieldIncrementTrigger />
+												<NumberFieldDecrementTrigger />
 											</NumberFieldGroup>
 											<NumberFieldErrorMessage>
 												Veuillez entrer un nombre valide de personnes par
