@@ -3,9 +3,11 @@ import { saveAs } from "file-saver";
 import { IoPeople, IoSettingsOutline } from "solid-icons/io";
 import { IoRefreshSharp } from "solid-icons/io";
 import { RiSystemTimer2Line } from "solid-icons/ri";
+import { Separator } from "~/components/ui/separator";
 import {
 	For,
 	Show,
+	createEffect,
 	createResource,
 	createSignal,
 	onCleanup,
@@ -16,14 +18,9 @@ import { getSessionEmail, useUserContext } from "~/components/context";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardFooter,
-	CardTitle,
-} from "~/components/ui/card";
+import { Card, CardFooter, CardTitle } from "~/components/ui/card";
 import { Checkbox } from "~/components/ui/checkbox";
+
 import {
 	Dialog,
 	DialogContent,
@@ -40,6 +37,7 @@ import {
 	NumberFieldGroup,
 	NumberFieldIncrementTrigger,
 	NumberFieldInput,
+	NumberFieldLabel,
 } from "~/components/ui/number-field";
 import {
 	Select,
@@ -48,6 +46,11 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "~/components/ui/select";
+import {
+	TextField,
+	TextFieldInput,
+	TextFieldLabel,
+} from "~/components/ui/text-field";
 import SpinWheel from "~/components/wheel";
 import {
 	getAttendanceByEmail,
@@ -59,6 +62,7 @@ import {
 	getStudentAttenceStatus,
 	supabase,
 	updateAttendanceForClassBlock,
+	updateLateTimeInterval,
 } from "~/supabase-client";
 
 export interface Attendance {
@@ -80,10 +84,14 @@ export default function TrackingPage() {
 }
 
 function InstructorView() {
-	const email = useUserContext().user()?.email;
-	const [selectedCourseId, setSelectedCourseId] = createSignal(1);
-	const [selectedBlockId, setSelectedBlockId] = createSignal(1);
-	const [courses] = createResource(
+	const email = getSessionEmail;
+	const [selectedCourseId, setSelectedCourseId] = createSignal<number>();
+	const [lateTimeInterval, setLateTimeInterval] = createSignal<number[]>();
+	const [selectedBlockId, setSelectedBlockId] = createSignal<number>();
+	const [openEditCourseDialog, setOpenEditCourseDialog] = createSignal(false);
+	const [loading, setLoading] = createSignal(false);
+
+	const [courses, { refetch: refetchCourses }] = createResource(
 		email,
 		async (email) => {
 			if (!email) return null;
@@ -92,10 +100,11 @@ function InstructorView() {
 		{ initialValue: [] },
 	);
 	const [blocks] = createResource(
-		async () => {
-			return getClassBlocksByCourseId(selectedCourseId());
+		selectedCourseId,
+		async (selectedCourseId) => {
+			return getClassBlocksByCourseId(selectedCourseId);
 		},
-		{ initialValue: [1] },
+		{ initialValue: [] },
 	);
 	const [attendances, { refetch }] = createResource(
 		selectedBlockId,
@@ -104,6 +113,27 @@ function InstructorView() {
 			return getAttendanceForClassBlock(blockId);
 		},
 	);
+
+	const presentAttendances = () => {
+		return attendances().filter(
+			(a: { attendance_status: string }) => a.attendance_status === "Present" || a.attendance_status === "Late",
+		);
+	};
+
+	createEffect(() => {
+		const coursesList = courses();
+		if (coursesList.length > 0 && !selectedCourseId()) {
+			setSelectedCourseId(coursesList[0].course_id); // Premier cours par défaut
+			setLateTimeInterval(coursesList[0].late_time_interval);
+		}
+	});
+	createEffect(() => {
+		const blocksList = blocks();
+		if (blocksList.length > 0 && !selectedBlockId()) {
+			setSelectedBlockId(blocksList[0].block_id); // Premier block par défaut
+		}
+	});
+
 	const [open, setOpen] = createSignal(false);
 	const [selectedStudent, setSelectedStudent] = createSignal<Attendance | null>(
 		null,
@@ -225,6 +255,16 @@ function InstructorView() {
 				<div class="flex flex-wrap gap-2">
 					<Select
 						options={courses()}
+						value={courses().find(
+							(course) => course.course_id === selectedCourseId(),
+						)}
+						onChange={(course) => {
+							if(course) {
+								setSelectedCourseId(course.course_id);
+								setLateTimeInterval(course.late_time_interval);
+								setSelectedBlockId(undefined);
+							}
+						}}
 						optionValue="course_id"
 						optionTextValue="course_name"
 						placeholder="Select a course"
@@ -232,15 +272,24 @@ function InstructorView() {
 							<SelectItem item={props.item}>{props.item.textValue}</SelectItem>
 						)}
 					>
-						<SelectTrigger aria-label="Block" class="w-[180px]">
+						<SelectTrigger aria-label="Course" class="w-[180px]">
 							<SelectValue<string>>
-								{(state) => state.selectedOption().course_name}
+								{(state) => state.selectedOption()?.course_name}
 							</SelectValue>
 						</SelectTrigger>
 						<SelectContent />
 					</Select>
 					<Select
 						options={blocks()}
+						value={blocks().find(
+							(block) => block.block_id === selectedBlockId(),
+						)}
+						onChange={(block) => {
+							if (block) {
+								// Add a null check before accessing block properties
+								setSelectedBlockId(block.block_id);
+							}
+						}}
 						optionValue="block_id"
 						optionTextValue="block_name"
 						placeholder="Select a class block"
@@ -250,15 +299,104 @@ function InstructorView() {
 					>
 						<SelectTrigger aria-label="Block" class="w-[180px]">
 							<SelectValue<string>>
-								{(state) => state.selectedOption().block_name}
+								{(state) => state.selectedOption()?.block_name}
 							</SelectValue>
 						</SelectTrigger>
 						<SelectContent />
 					</Select>
-					<Button class="gap-1">
+					<Button onClick={setOpenEditCourseDialog} class="gap-1">
 						<IoSettingsOutline class="h-5 w-5" />
 						Edit course
 					</Button>
+					<Dialog
+						open={openEditCourseDialog()}
+						onOpenChange={setOpenEditCourseDialog}
+					>
+						<DialogContent>
+							<DialogHeader>
+								<DialogTitle class="flex flex-row gap-2 items-center">
+									Edit Course
+									<Button
+										variant="ghost"
+										class="flex h-5 w-5 p-3"
+										title="Refresh"
+										onClick={() => {
+											refetchCourses();
+										}}
+									>
+										<IoRefreshSharp class="h-5 w-5" />
+									</Button>
+								</DialogTitle>
+								<DialogDescription>
+									Changer les paramètres du cours
+								</DialogDescription>
+							</DialogHeader>
+							<TextField class="flex flex-row items-center">
+								<TextFieldLabel>Nom</TextFieldLabel>
+								<TextFieldInput
+									value={
+										courses().find(
+											(course) => course.course_id === selectedCourseId(),
+										).course_name
+									}
+									disabled
+								/>
+							</TextField>
+							<NumberField
+								class="flex flex-row items-center gap-2"
+								value={lateTimeInterval()[0]}
+								onRawValueChange={(value) =>
+									setLateTimeInterval((prev) => [value, prev[1]])
+								}
+								minValue={0}
+								maxValue={lateTimeInterval()[1]}
+							>
+								<NumberFieldLabel>Début du retard</NumberFieldLabel>
+								<NumberFieldGroup>
+									<NumberFieldInput />
+									<NumberFieldIncrementTrigger />
+									<NumberFieldDecrementTrigger />
+								</NumberFieldGroup>
+								<span>min</span>
+							</NumberField>
+							<NumberField
+								class="flex flex-row items-center gap-2"
+								value={lateTimeInterval()[1]}
+								onRawValueChange={(value) =>
+									setLateTimeInterval(
+										setLateTimeInterval((prev) => [prev[0], value]),
+									)
+								}
+								minValue={lateTimeInterval()[0]}
+								maxValue={600}
+							>
+								<NumberFieldLabel>Fin du retard</NumberFieldLabel>
+								<NumberFieldGroup>
+									<NumberFieldInput />
+									<NumberFieldIncrementTrigger />
+									<NumberFieldDecrementTrigger />
+								</NumberFieldGroup>
+								<span>min</span>
+							</NumberField>
+							<DialogFooter>
+								<Button
+									disabled={loading()}
+									onClick={() => {
+										setLoading(true);
+										updateLateTimeInterval(
+											selectedCourseId(),
+											lateTimeInterval(),
+										).then(() => {
+											refetchCourses();
+											setLoading(false);
+										});
+									}}
+								>
+									Sauvegarder
+								</Button>
+							</DialogFooter>
+						</DialogContent>
+					</Dialog>
 				</div>
 				<div class="flex flex-wrap gap-2">
 					<Button onClick={setOpenWheelDialog} class="gap-1">
@@ -441,58 +579,99 @@ function InstructorView() {
 					</Dialog>
 				</div>
 			</div>
-			<div class="flex justify-center">
-				<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 m-5 gap-5 max-w-screen-2xl">
-					<Show
-						when={attendances() && Object.keys(attendances()).length !== 0}
-						fallback={"No Data"}
-					>
-						<For each={attendances()}>
-							{(attendance) => (
-								<Card class="flex flex-col justify-center items-center space-y-3 p-2 min-w-fit">
-									<Avatar
-										class="w-28 h-28 cursor-pointer"
-										onClick={() => {
-											setSelectedStudent(attendance);
-											setOpen(true);
-										}}
+			<div class="flex justify-center m-2">
+				<Show
+					when={attendances() && Object.keys(attendances()).length !== 0}
+					fallback={"No Data"}
+				>
+					<div class="flex flex-col">
+						<div class="flex justify-center items-center">
+							<span class="flex flex-wrap gap-2 text-lg font-semibold">
+								<span>Nombre d'étudiants présents:</span>
+								<span>
+									<span
+										class={
+											presentAttendances().length > 0
+												? "text-green-600"
+												: "text-red-600"
+										}
 									>
-										<AvatarImage
-											src={getPictureUrl(
-												`students/${attendance.matricule}.jpg`,
-											)}
-											class="object-cover w-28 h-28"
-										/>
-										<AvatarFallback>Photo</AvatarFallback>
-									</Avatar>
-									<CardTitle>{attendance.student_full_name}</CardTitle>
-									<CardFooter>
-										<Badge
-											onClick={() =>
+										{presentAttendances().length}
+									</span>
+									<span class="text-gray-500"> / {attendances().length}</span>
+								</span>
+							</span>
+						</div>
+						<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 m-5 gap-5 max-w-screen-2xl">
+							<For each={attendances()}>
+								{(attendance) => (
+									<Card
+										class="flex flex-col justify-center items-center space-y-3 p-2 min-w-fit"
+										tabindex="0"
+										aria-label={attendance.student_full_name}
+										onKeyDown={(e) => {
+											if (e.key === "+" || e.key === "p") {
+												setSelectedStudent(attendance);
+												setOpen(true);
+												e.preventDefault();
+											}
+											if (e.key === "Enter" || e.key === " ") {
 												updateAttendanceForClassBlock(
 													attendance.student_email,
 													selectedBlockId(),
-													attendance.attendance_status === "Present"
+													attendance.attendance_status === "Present" || attendance.attendance_status === "Late"
 														? "Absent"
 														: "Present",
 													"manual",
-												)
+												);
+												e.preventDefault();
 											}
-											class={`${attendance.attendance_status === "Present" ? "bg-green-600 text-white hover:bg-green-800" : ""} cursor-pointer`}
-											variant={
-												attendance.attendance_status === "Present"
-													? "default"
-													: "destructive"
-											}
+										}}
+									>
+										<Avatar
+											class="w-28 h-28 cursor-pointer"
+											onClick={() => {
+												setSelectedStudent(attendance);
+												setOpen(true);
+											}}
 										>
-											{attendance.attendance_status}
-										</Badge>
-									</CardFooter>
-								</Card>
-							)}
-						</For>
-					</Show>
-				</div>
+											<AvatarImage
+												src={getPictureUrl(
+													`students/${attendance.matricule}.jpg`,
+												)}
+												class="object-cover w-28 h-28"
+											/>
+											<AvatarFallback>Photo</AvatarFallback>
+										</Avatar>
+										<CardTitle>{attendance.student_full_name}</CardTitle>
+										<CardFooter>
+											<Badge
+												onClick={() =>
+													updateAttendanceForClassBlock(
+														attendance.student_email,
+														selectedBlockId(),
+														attendance.attendance_status === "Present" || attendance.attendance_status === "Late"
+															? "Absent"
+															: "Present",
+														"manual",
+													)
+												}
+												class={`${attendance.attendance_status === "Present" ? "bg-green-600 text-white hover:bg-green-800" : attendance.attendance_status === "Late" ? "bg-green-600 text-white hover:bg-green-800 border-4 border-yellow-400" : ""} {} cursor-pointer`}
+												variant={
+													attendance.attendance_status === "Present" || attendance.attendance_status === "Late"
+														? "default"
+														: "destructive"
+												}
+											>
+												{attendance.attendance_status === "Late" ? "Present" : attendance.attendance_status}
+											</Badge>
+										</CardFooter>
+									</Card>
+								)}
+							</For>
+						</div>
+					</div>
+				</Show>
 			</div>
 			<Dialog open={open()} onOpenChange={setOpen}>
 				<DialogContent>
@@ -513,8 +692,11 @@ function InstructorView() {
 								</DialogTitle>
 								<DialogDescription class="flex flex-col">
 									<span>Matricule : {selectedStudent()?.matricule}</span>
-									<span>Classe : 3TL1</span>
 									<span>Statut : {selectedStudent()?.attendance_status}</span>
+									<Separator class="my-2"/>
+									<span>Total présences : {}</span>
+									<span>Total retards : {}</span>
+									<span>Total absences : {}</span>
 								</DialogDescription>
 							</DialogHeader>
 						</div>
