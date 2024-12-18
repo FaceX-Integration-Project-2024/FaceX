@@ -28,6 +28,7 @@ import {
 	Dialog,
 	DialogContent,
 	DialogDescription,
+	DialogFooter,
 	DialogHeader,
 	DialogTitle,
 } from "~/components/ui/dialog";
@@ -410,6 +411,8 @@ function InstructorView() {
 										)}
 									</For>
 								</div>
+							</Show>
+							<DialogFooter>
 								<Button
 									variant="outline"
 									onClick={exportGroupsToExcel}
@@ -417,7 +420,7 @@ function InstructorView() {
 								>
 									Exporter les groupes
 								</Button>
-							</Show>
+							</DialogFooter>
 						</DialogContent>
 					</Dialog>
 				</div>
