@@ -290,25 +290,25 @@ function InstructorView() {
 							<div class="flex flex-col gap-4">
 								<div class="flex items-start gap-2">
 									<div class="relative">
-										<NumberField
-											defaultValue={2}
-											onRawValueChange={(value) => {
-												setPeoplePerGroup(value);
-												setGroups(
-													createGroups(
-														peoplePerGroup(),
-														attendances().filter(
+									<NumberField
+										defaultValue={2}
+										onRawValueChange={(value) => {
+											setPeoplePerGroup(value);
+											setGroups(
+												createGroups(
+													value,
+													includeAbsents()
+														? attendances()
+														: attendances().filter(
 															(a: { attendance_status: string }) =>
-																a.attendance_status === "Present",
+																a.attendance_status === "Present" || a.attendance_status === "Late",
 														),
-													),
-												);
-											}}
-											validationState={
-												peoplePerGroup() <= 0 ? "invalid" : "valid"
-											}
-											class="w-36"
-										>
+												),
+											);
+										}}
+										validationState={peoplePerGroup() <= 0 ? "invalid" : "valid"}
+										class="w-36"
+									>
 											<NumberFieldGroup>
 												<NumberFieldInput type="number" min={1} step="1" />
 											</NumberFieldGroup>
@@ -325,18 +325,15 @@ function InstructorView() {
 											class="w-10 h-10 flex items-center justify-center p-0"
 											title="Refresh"
 											onClick={() => {
-												const presentStudents = attendances().filter(
-													(a: { attendance_status: string }) =>
-														a.attendance_status === "Present",
-												);
-
-												const newGroups = createGroups(
-													peoplePerGroup(),
-													presentStudents,
-												);
-
+												const filteredStudents = includeAbsents()
+													? attendances()
+													: attendances().filter(
+														(a: { attendance_status: string }) =>
+															a.attendance_status === "Present" || a.attendance_status === "Late",
+													);
+										
+												const newGroups = createGroups(peoplePerGroup(), filteredStudents);
 												setGroups(newGroups);
-
 												setOpenDialog(true);
 											}}
 										>
@@ -358,7 +355,7 @@ function InstructorView() {
 														? attendances()
 														: attendances().filter(
 																(a: { attendance_status: string }) =>
-																	a.attendance_status === "Present",
+																	a.attendance_status === "Present" || a.attendance_status === "Late",
 															),
 												),
 											);
