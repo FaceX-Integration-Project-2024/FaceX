@@ -120,20 +120,20 @@ export async function updateAttendanceForClassBlock(
 	return data;
 }
 
-export async function updateLateTimeLimit(
+export async function updateLateTimeInterval(
 	course_id: number,
-	new_late_time_limit: number,
+	new_late_time_interval: number[],
 ) {
-	const { data, error } = await supabase.rpc("update_late_time_limit", {
+	const { data, error } = await supabase.rpc("update_late_time_interval", {
 		course_id: course_id,
-		new_late_time_limit: new_late_time_limit,
+		new_late_time_interval: new_late_time_interval,
 	});
 	if (error) {
 		throw new Error(
-			`Error fetching data for update_late_time_limit: ${error.message}`,
+			`Error fetching data for update_late_time_interval: ${error.message}`,
 		);
 	}
-	//return data;
+	return data;
 }
 
 export function getPictureUrl(picturePath: string) {

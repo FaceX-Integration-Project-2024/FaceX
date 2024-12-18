@@ -56,7 +56,7 @@ import {
 	getStudentAttenceStatus,
 	supabase,
 	updateAttendanceForClassBlock,
-	updateLateTimeLimit,
+	updateLateTimeInterval,
 } from "~/supabase-client";
 
 export interface Attendance {
@@ -80,9 +80,10 @@ export default function TrackingPage() {
 function InstructorView() {
 	const email = getSessionEmail;
 	const [selectedCourseId, setSelectedCourseId] = createSignal<number>();
-	const [lateTimeLimit, setLateTimeLimit] = createSignal<number>();
+	const [lateTimeInterval, setLateTimeInterval] = createSignal<number[]>();
 	const [selectedBlockId, setSelectedBlockId] = createSignal<number>();
 	const [openEditCourseDialog, setOpenEditCourseDialog] = createSignal(false);
+	const [loading, setLoading] = createSignal(false);
 
 	const [courses, { refetch: refetchCourses }] = createResource(
 		email,
@@ -117,7 +118,7 @@ function InstructorView() {
 		const coursesList = courses();
 		if (coursesList.length > 0 && !selectedCourseId()) {
 			setSelectedCourseId(coursesList[0].course_id); // Premier cours par défaut
-			setLateTimeLimit(coursesList[0].late_time_limit);
+			setLateTimeInterval(coursesList[0].late_time_interval);
 		}
 	});
 	createEffect(() => {
@@ -209,7 +210,7 @@ function InstructorView() {
 						)}
 						onChange={(course) => {
 							setSelectedCourseId(course.course_id);
-							setLateTimeLimit(course.late_time_limit);
+							setLateTimeInterval(course.late_time_interval);
 							setSelectedBlockId(undefined);
 						}}
 						optionValue="course_id"
@@ -261,7 +262,19 @@ function InstructorView() {
 					>
 						<DialogContent>
 							<DialogHeader>
-								<DialogTitle>Edit Course</DialogTitle>
+								<DialogTitle class="flex flex-row gap-2 items-center">
+									Edit Course
+									<Button
+										variant="ghost"
+										class="flex h-5 w-5 p-3"
+										title="Refresh"
+										onClick={() => {
+											refetchCourses();
+										}}
+									>
+										<IoRefreshSharp class="h-5 w-5" />
+									</Button>
+								</DialogTitle>
 								<DialogDescription>
 									Changer les paramètres du cours
 								</DialogDescription>
@@ -279,12 +292,33 @@ function InstructorView() {
 							</TextField>
 							<NumberField
 								class="flex flex-row items-center gap-2"
-								value={lateTimeLimit()}
-								onRawValueChange={(value) => setLateTimeLimit(value)}
+								value={lateTimeInterval()[0]}
+								onRawValueChange={(value) =>
+									setLateTimeInterval((prev) => [value, prev[1]])
+								}
 								minValue={0}
+								maxValue={lateTimeInterval()[1]}
+							>
+								<NumberFieldLabel>Début du retard</NumberFieldLabel>
+								<NumberFieldGroup>
+									<NumberFieldInput />
+									<NumberFieldIncrementTrigger />
+									<NumberFieldDecrementTrigger />
+								</NumberFieldGroup>
+								<span>min</span>
+							</NumberField>
+							<NumberField
+								class="flex flex-row items-center gap-2"
+								value={lateTimeInterval()[1]}
+								onRawValueChange={(value) =>
+									setLateTimeInterval(
+										setLateTimeInterval((prev) => [prev[0], value]),
+									)
+								}
+								minValue={lateTimeInterval()[0]}
 								maxValue={600}
 							>
-								<NumberFieldLabel>Variable de retard</NumberFieldLabel>
+								<NumberFieldLabel>Fin du retard</NumberFieldLabel>
 								<NumberFieldGroup>
 									<NumberFieldInput />
 									<NumberFieldIncrementTrigger />
@@ -294,11 +328,16 @@ function InstructorView() {
 							</NumberField>
 							<DialogFooter>
 								<Button
+									disabled={loading()}
 									onClick={() => {
-										updateLateTimeLimit(
+										setLoading(true);
+										updateLateTimeInterval(
 											selectedCourseId(),
-											lateTimeLimit(),
-										).then(refetchCourses());
+											lateTimeInterval(),
+										).then(() => {
+											refetchCourses();
+											setLoading(false);
+										});
 									}}
 								>
 									Sauvegarder
