@@ -120,6 +120,22 @@ export async function updateAttendanceForClassBlock(
 	return data;
 }
 
+export async function updateLateTimeLimit(
+	course_id: number,
+	new_late_time_limit: number,
+) {
+	const { data, error } = await supabase.rpc("update_late_time_limit", {
+		course_id: course_id,
+		new_late_time_limit: new_late_time_limit,
+	});
+	if (error) {
+		throw new Error(
+			`Error fetching data for update_late_time_limit: ${error.message}`,
+		);
+	}
+	//return data;
+}
+
 export function getPictureUrl(picturePath: string) {
 	const { data } = supabase.storage
 		.from(storageBucket)

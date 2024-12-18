@@ -20,6 +20,7 @@ import {
 	Dialog,
 	DialogContent,
 	DialogDescription,
+	DialogFooter,
 	DialogHeader,
 	DialogTitle,
 } from "~/components/ui/dialog";
@@ -30,6 +31,7 @@ import {
 	NumberFieldGroup,
 	NumberFieldIncrementTrigger,
 	NumberFieldInput,
+	NumberFieldLabel,
 } from "~/components/ui/number-field";
 import {
 	Select,
@@ -38,6 +40,11 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "~/components/ui/select";
+import {
+	TextField,
+	TextFieldInput,
+	TextFieldLabel,
+} from "~/components/ui/text-field";
 import SpinWheel from "~/components/wheel";
 import {
 	getAttendanceByEmail,
@@ -49,6 +56,7 @@ import {
 	getStudentAttenceStatus,
 	supabase,
 	updateAttendanceForClassBlock,
+	updateLateTimeLimit,
 } from "~/supabase-client";
 
 export interface Attendance {
@@ -72,8 +80,11 @@ export default function TrackingPage() {
 function InstructorView() {
 	const email = getSessionEmail;
 	const [selectedCourseId, setSelectedCourseId] = createSignal<number>();
+	const [lateTimeLimit, setLateTimeLimit] = createSignal<number>();
 	const [selectedBlockId, setSelectedBlockId] = createSignal<number>();
-	const [courses] = createResource(
+	const [openEditCourseDialog, setOpenEditCourseDialog] = createSignal(false);
+
+	const [courses, { refetch: refetchCourses }] = createResource(
 		email,
 		async (email) => {
 			if (!email) return null;
@@ -106,6 +117,7 @@ function InstructorView() {
 		const coursesList = courses();
 		if (coursesList.length > 0 && !selectedCourseId()) {
 			setSelectedCourseId(coursesList[0].course_id); // Premier cours par défaut
+			setLateTimeLimit(coursesList[0].late_time_limit);
 		}
 	});
 	createEffect(() => {
@@ -197,6 +209,7 @@ function InstructorView() {
 						)}
 						onChange={(course) => {
 							setSelectedCourseId(course.course_id);
+							setLateTimeLimit(course.late_time_limit);
 							setSelectedBlockId(undefined);
 						}}
 						optionValue="course_id"
@@ -238,10 +251,61 @@ function InstructorView() {
 						</SelectTrigger>
 						<SelectContent />
 					</Select>
-					<Button class="gap-1">
+					<Button onClick={setOpenEditCourseDialog} class="gap-1">
 						<IoSettingsOutline class="h-5 w-5" />
 						Edit course
 					</Button>
+					<Dialog
+						open={openEditCourseDialog()}
+						onOpenChange={setOpenEditCourseDialog}
+					>
+						<DialogContent>
+							<DialogHeader>
+								<DialogTitle>Edit Course</DialogTitle>
+								<DialogDescription>
+									Changer les paramètres du cours
+								</DialogDescription>
+							</DialogHeader>
+							<TextField class="flex flex-row items-center">
+								<TextFieldLabel>Nom</TextFieldLabel>
+								<TextFieldInput
+									value={
+										courses().find(
+											(course) => course.course_id === selectedCourseId(),
+										).course_name
+									}
+									disabled
+								/>
+							</TextField>
+							<NumberField
+								class="flex flex-row items-center gap-2"
+								value={lateTimeLimit()}
+								onRawValueChange={(value) => setLateTimeLimit(value)}
+								minValue={0}
+								maxValue={600}
+							>
+								<NumberFieldLabel>Variable de retard</NumberFieldLabel>
+								<NumberFieldGroup>
+									<NumberFieldInput />
+									<NumberFieldIncrementTrigger />
+									<NumberFieldDecrementTrigger />
+								</NumberFieldGroup>
+								<span>min</span>
+							</NumberField>
+							<DialogFooter>
+								<Button
+									onClick={() => {
+										updateLateTimeLimit(
+											selectedCourseId(),
+											lateTimeLimit(),
+										).then(refetchCourses());
+									}}
+								>
+									Sauvegarder
+								</Button>
+							</DialogFooter>
+						</DialogContent>
+					</Dialog>
 				</div>
 				<div class="flex flex-wrap gap-2">
 					<Button onClick={setOpenWheelDialog} class="gap-1">
