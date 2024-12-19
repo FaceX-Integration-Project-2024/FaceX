@@ -1,5 +1,4 @@
 {
-  "types": ["jest", "@testing-library/jest-dom"],
   "compilerOptions": {
     "target": "ESNext",
     "module": "ESNext",
@@ -12,7 +11,9 @@
     "strict": true,
     "noEmit": true,
     "types": [
-      "vinxi/types/client"
+      "vinxi/types/client",
+      "jest",
+      "@testing-library/jest-dom",
     ],
     "isolatedModules": true,
     "paths": {

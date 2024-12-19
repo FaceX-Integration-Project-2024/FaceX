@@ -17,12 +17,20 @@ export default {
 					],
 					"@babel/preset-typescript",
 					"babel-preset-solid",
+					[
+						"babel-preset-vite",
+						{
+							env: true,
+							glob: false,
+						},
+					],
 				],
 			},
 		],
 	},
 	testEnvironment: "jsdom",
 	moduleNameMapper: {
+		"^~/(.*)$": "<rootDir>/src/$1",
 		"^solid-js$": "solid-js/dist/solid.cjs",
 		"^solid-js/web$": "solid-js/web/dist/web.cjs",
 	},

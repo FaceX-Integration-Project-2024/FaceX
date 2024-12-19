@@ -88,6 +88,22 @@ export async function getStudentAttenceStatus(email: string) {
 	return data;
 }
 
+export async function getStudentStatsForCourse(
+	course_id: number,
+	student_email: string,
+) {
+	const { data, error } = await supabase.rpc("get_student_stats_for_course", {
+		p_course_id: course_id,
+		p_student_email: student_email,
+	});
+	if (error) {
+		throw new Error(
+			`Error fetching data for get_student_stats_for_course: ${error.message}`,
+		);
+	}
+	return data;
+}
+
 export async function getAttendanceForClassBlock(class_block_id: number) {
 	const { data, error } = await supabase.rpc("get_attendance_for_class_block", {
 		p_block_id: class_block_id,
