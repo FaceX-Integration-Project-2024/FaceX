@@ -2,6 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const storageBucket = "id-pictures";
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
@@ -14,8 +15,28 @@ async function fetchData<T>(rpcName: string): Promise<T> {
 	return data;
 }
 
-export async function getAllClassBlocksIds() {
-	return fetchData<Array<number>>("get_all_class_block_ids");
+export async function getCoursesByInstructorId(instructorEmail: string) {
+	const { data, error } = await supabase.rpc("get_courses_by_instructor", {
+		instructor_email: instructorEmail,
+	});
+	if (error) {
+		throw new Error(
+			`Error fetching data for get_courses_by_instructor: ${error.message}`,
+		);
+	}
+	return data;
+}
+
+export async function getClassBlocksByCourseId(courseId: number) {
+	const { data, error } = await supabase.rpc("get_blocks_by_course", {
+		course_id: courseId,
+	});
+	if (error) {
+		throw new Error(
+			`Error fetching data for get_blocks_by_course: ${error.message}`,
+		);
+	}
+	return data;
 }
 
 export async function getUserByEmail(email: string | undefined) {
@@ -25,6 +46,59 @@ export async function getUserByEmail(email: string | undefined) {
 	if (error) {
 		throw new Error(
 			`Error fetching data for get_user_by_email: ${error.message}`,
+		);
+	}
+	return data;
+}
+
+export async function getAttendanceByEmail(email: string) {
+	const { data, error } = await supabase.rpc("get_attendance_by_email", {
+		user_email: email,
+	});
+	if (error) {
+		throw new Error(
+			`Error fetching data for get_attendance_by_email: ${error.message}`,
+		);
+	}
+	return data;
+}
+
+export async function getAttendanceByStatus(email: string, status: string) {
+	const { data, error } = await supabase.rpc("get_attendance_by_status", {
+		user_email: email,
+		etustatus: status,
+	});
+	if (error) {
+		throw new Error(
+			`Error fetching data for get_attendance_by_status: ${error.message}`,
+		);
+	}
+	return data;
+}
+
+export async function getStudentAttenceStatus(email: string) {
+	const { data, error } = await supabase.rpc("get_student_attendance_status", {
+		etu_email: email,
+	});
+	if (error) {
+		throw new Error(
+			`Error fetching data for get_student_attendance_status: ${error.message}`,
+		);
+	}
+	return data;
+}
+
+export async function getStudentStatsForCourse(
+	course_id: number,
+	student_email: string,
+) {
+	const { data, error } = await supabase.rpc("get_student_stats_for_course", {
+		p_course_id: course_id,
+		p_student_email: student_email,
+	});
+	if (error) {
+		throw new Error(
+			`Error fetching data for get_student_stats_for_course: ${error.message}`,
 		);
 	}
 	return data;
@@ -40,4 +114,48 @@ export async function getAttendanceForClassBlock(class_block_id: number) {
 		);
 	}
 	return data;
+}
+
+export async function updateAttendanceForClassBlock(
+	student_email: string,
+	class_block_id: number,
+	status: string,
+	mode: string,
+) {
+	const { data, error } = await supabase.rpc("update_attendance", {
+		p_student_email: student_email,
+		p_block_id: class_block_id,
+		p_status: status,
+		p_mode: mode,
+	});
+	if (error) {
+		throw new Error(
+			`Error fetching data for update_attendance: ${error.message}`,
+		);
+	}
+	return data;
+}
+
+export async function updateLateTimeInterval(
+	course_id: number,
+	new_late_time_interval: number[],
+) {
+	const { data, error } = await supabase.rpc("update_late_time_interval", {
+		course_id: course_id,
+		new_late_time_interval: new_late_time_interval,
+	});
+	if (error) {
+		throw new Error(
+			`Error fetching data for update_late_time_interval: ${error.message}`,
+		);
+	}
+	return data;
+}
+
+export function getPictureUrl(picturePath: string) {
+	const { data } = supabase.storage
+		.from(storageBucket)
+		.getPublicUrl(picturePath);
+
+	return data.publicUrl;
 }

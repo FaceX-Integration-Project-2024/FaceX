@@ -1,7 +1,6 @@
 import {
 	type ComponentProps,
 	type FlowComponent,
-	JSXElement,
 	createContext,
 	createResource,
 	useContext,
@@ -53,4 +52,17 @@ export function useUserContext() {
 	}
 
 	return context;
+}
+
+export function getSessionEmail() {
+	const context = useContext(UserContext);
+
+	if (!context || !context.user()) {
+		console.warn(
+			"Utilisateur non authentifié ou contexte utilisateur non disponible.",
+		);
+		return null;
+	}
+
+	return context.user()?.email || null;
 }

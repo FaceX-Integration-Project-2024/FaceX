@@ -5,6 +5,7 @@ dist
 .vercel
 .netlify
 .vinxi
+package-lock.json
 app.config.timestamp_*.js
 
 # Environment
