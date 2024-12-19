@@ -57,6 +57,7 @@ import {
 	getClassBlocksByCourseId,
 	getCoursesByInstructorId,
 	getPictureUrl,
+	getStudentStatsForCourse,
 	supabase,
 	updateAttendanceForClassBlock,
 	updateLateTimeInterval,
@@ -117,6 +118,13 @@ export default function InstructorView() {
 	const [open, setOpen] = createSignal(false);
 	const [selectedStudent, setSelectedStudent] = createSignal<Attendance | null>(
 		null,
+	);
+    const [studentStats] = createResource(
+		() => [selectedStudent(), selectedCourseId()],
+		async ([selectedStudent, selectedCourseId]) => {
+			if (!selectedStudent || !selectedCourseId) return null;
+			return getStudentStatsForCourse(selectedCourseId, selectedStudent.student_email);
+		},
 	);
 
 	// Handle real-time inserts, updates and deletes
@@ -690,9 +698,11 @@ export default function InstructorView() {
 									<span>Matricule : {selectedStudent()?.matricule}</span>
 									<span>Statut : {selectedStudent()?.attendance_status}</span>
 									<Separator class="my-2" />
-									<span>Total présences : {}</span>
-									<span>Total retards : {}</span>
-									<span>Total absences : {}</span>
+                                    <Show when={!studentStats.loading && studentStats() && studentStats()[0]} fallback={"loading..."}>
+                                        <span>Total présences : {studentStats()[0].present_count}</span>
+                                        <span>Total retards : {studentStats()[0].late_count}</span>
+                                        <span>Total absences : {studentStats()[0].absent_count}</span>
+                                    </Show>
 								</DialogDescription>
 							</DialogHeader>
 						</div>
