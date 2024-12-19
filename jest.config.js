@@ -20,10 +20,10 @@ export default {
 					[
 						"babel-preset-vite",
 						{
-						  "env": true,
-						  "glob": false
-						}
-					]
+							env: true,
+							glob: false,
+						},
+					],
 				],
 			},
 		],

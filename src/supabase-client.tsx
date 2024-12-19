@@ -88,7 +88,10 @@ export async function getStudentAttenceStatus(email: string) {
 	return data;
 }
 
-export async function getStudentStatsForCourse(course_id: number, student_email: string) {
+export async function getStudentStatsForCourse(
+	course_id: number,
+	student_email: string,
+) {
 	const { data, error } = await supabase.rpc("get_student_stats_for_course", {
 		p_course_id: course_id,
 		p_student_email: student_email,

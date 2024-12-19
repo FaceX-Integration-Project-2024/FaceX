@@ -119,11 +119,14 @@ export default function InstructorView() {
 	const [selectedStudent, setSelectedStudent] = createSignal<Attendance | null>(
 		null,
 	);
-    const [studentStats] = createResource(
+	const [studentStats] = createResource(
 		() => [selectedStudent(), selectedCourseId()],
 		async ([selectedStudent, selectedCourseId]) => {
 			if (!selectedStudent || !selectedCourseId) return null;
-			return getStudentStatsForCourse(selectedCourseId, selectedStudent.student_email);
+			return getStudentStatsForCourse(
+				selectedCourseId,
+				selectedStudent.student_email,
+			);
 		},
 	);
 
@@ -457,7 +460,7 @@ export default function InstructorView() {
 											class="w-36"
 										>
 											<NumberFieldGroup>
-												<NumberFieldInput/>
+												<NumberFieldInput />
 												<NumberFieldIncrementTrigger />
 												<NumberFieldDecrementTrigger />
 											</NumberFieldGroup>
@@ -698,11 +701,22 @@ export default function InstructorView() {
 									<span>Matricule : {selectedStudent()?.matricule}</span>
 									<span>Statut : {selectedStudent()?.attendance_status}</span>
 									<Separator class="my-2" />
-                                    <Show when={!studentStats.loading && studentStats() && studentStats()[0]} fallback={"loading..."}>
-                                        <span>Total présences : {studentStats()[0].present_count}</span>
-                                        <span>Total retards : {studentStats()[0].late_count}</span>
-                                        <span>Total absences : {studentStats()[0].absent_count}</span>
-                                    </Show>
+									<Show
+										when={
+											!studentStats.loading &&
+											studentStats() &&
+											studentStats()[0]
+										}
+										fallback={"loading..."}
+									>
+										<span>
+											Total présences : {studentStats()[0].present_count}
+										</span>
+										<span>Total retards : {studentStats()[0].late_count}</span>
+										<span>
+											Total absences : {studentStats()[0].absent_count}
+										</span>
+									</Show>
 								</DialogDescription>
 							</DialogHeader>
 						</div>
